@@ -18,6 +18,7 @@ target/
 *.iws
 *.iml
 *.ipr
+out/
 
 ### NetBeans ###
 /nbproject/private/
@@ -31,3 +32,38 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### OS Specific ###
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.nfs*
+
+### Logs and temp ###
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+### Others ###
+*.class
+*.war
+*.ear
+hs_err_pid*
+replay_pid*
+
+### Environment / Secrets ###
+.env
+.env.*
+!.env.example        # keep a sample template
