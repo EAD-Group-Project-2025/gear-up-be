@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/public/v1/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class UserController {
 
