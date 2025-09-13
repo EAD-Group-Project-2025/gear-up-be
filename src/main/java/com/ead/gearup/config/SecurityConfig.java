@@ -1,8 +1,9 @@
 package com.ead.gearup.config;
 
+import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.Filter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +21,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.ead.gearup.security.JwtAuthenticationFilter;
 import com.ead.gearup.service.UserService;
+import com.ead.gearup.service.auth.CustomUserDetailsService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,11 +35,10 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final UserService userService; // must implement UserDetailsService
+    private final CustomUserDetailsService customUserDetailsService; // must implement UserDetailsService
 
-    /*
-     * Main security configuration
-     * Defines endpoint access rules and JWT filter setup
+    /**
+     * Main Security Filter Chain
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -47,7 +49,7 @@ public class SecurityConfig {
                 // CORS configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // Define endpoint access rules
+                // Endpoint authorization
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers(
@@ -64,7 +66,7 @@ public class SecurityConfig {
                         // All other endpoints require authentication
                         .anyRequest().authenticated())
 
-                // Stateless session (required for JWT)
+                // Stateless session (JWT)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // Exception handling for REST APIs
@@ -72,7 +74,7 @@ public class SecurityConfig {
                         (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
                                 authException.getMessage())))
 
-                // Set authentication provider
+                // Authentication provider
                 .authenticationProvider(authenticationProvider())
 
                 // Add JWT filter before Spring Security default filter
@@ -95,7 +97,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userService); // UserService implements UserDetailsService
+        provider.setUserDetailsService(customUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
@@ -109,18 +111,18 @@ public class SecurityConfig {
     }
 
     /**
-     * CORS configuration for frontend
+     * CORS configuration
      */
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-                "http://localhost:3000", // development frontend
-                "https://your-production-domain.com" // production frontend
+                "http://localhost:3000", // dev frontend
+                "https://your-production.com" // production frontend
         ));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        config.setAllowCredentials(true); // allow cookies or auth headers if needed
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
