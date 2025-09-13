@@ -16,6 +16,6 @@ public class HealthCheckController {
     @GetMapping
     public ResponseEntity<String> healthCheck() {
         String message = "voluntrix-backend is running successfully";
-        return new ResponseEntity<>(message, HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 }
