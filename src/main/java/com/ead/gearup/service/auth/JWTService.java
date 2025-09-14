@@ -32,16 +32,27 @@ public class JWTService {
     @Value("${jwt.refresh.expiration:604800000}") // 7 days default
     private long refreshTokenDurationMs;
 
-    public String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
+    public String generateToken(UserDetails userDetails) {
+        return generateToken(userDetails, new HashMap<>());
+    }
 
+    public String generateToken(UserDetails userDetails, Map<String, Object> extraClaims) {
         return Jwts.builder()
-                .claims()
-                .add(claims)
-                .subject(username)
+                .claims(extraClaims)
+                .claim("role", userDetails.getAuthorities().iterator().next().getAuthority())
+                .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationMillis))
-                .and()
+                .signWith(getSignKey())
+                .compact();
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .claim("role", userDetails.getAuthorities().iterator().next().getAuthority())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + refreshTokenDurationMs))
                 .signWith(getSignKey())
                 .compact();
     }
@@ -69,9 +80,9 @@ public class JWTService {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
-    private <T> T extractClaim(String token, Function<Claims, T> clamisResolver) {
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
-        return clamisResolver.apply(claims);
+        return claimsResolver.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {
