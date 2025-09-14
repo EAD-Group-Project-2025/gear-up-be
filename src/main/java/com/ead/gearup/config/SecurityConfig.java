@@ -1,15 +1,15 @@
 package com.ead.gearup.config;
 
-import java.io.IOException;
 import java.util.List;
 
-import jakarta.servlet.Filter;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,10 +21,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.ead.gearup.security.JwtAuthenticationFilter;
-import com.ead.gearup.service.UserService;
+import com.ead.gearup.filter.JwtAuthenticationFilter;
 import com.ead.gearup.service.auth.CustomUserDetailsService;
 
 import lombok.RequiredArgsConstructor;
@@ -44,27 +42,28 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 // Disable CSRF for stateless JWT APIs
-                .csrf(csrf -> csrf.disable())
+                .csrf(customizer -> customizer.disable())
 
                 // CORS configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // Endpoint authorization
-                .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(request -> request
                         // Public endpoints
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
-                                "/api/auth/create-user",
-                                "/api/auth/generate-token",
+                                "/api/auth/register",
+                                "/api/auth/login",
                                 "/api/public/**")
                         .permitAll()
                         // Role-based endpoints
                         .requestMatchers("/auth/user/**").hasRole("USER")
                         .requestMatchers("/auth/admin/**").hasRole("ADMIN")
-                        // All other endpoints require authentication
                         .anyRequest().authenticated())
+
+                // .formLogin(Customizer.withDefaults())
+                .httpBasic(Customizer.withDefaults())
 
                 // Stateless session (JWT)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -79,7 +78,6 @@ public class SecurityConfig {
 
                 // Add JWT filter before Spring Security default filter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-
                 .build();
     }
 
