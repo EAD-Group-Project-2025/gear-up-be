@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.ead.gearup.service.auth.CustomUserDetailsService;
-import com.ead.gearup.service.auth.JWTService;
+import com.ead.gearup.service.auth.JwtService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,7 +23,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JWTService jwtService;
+    private final JwtService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
 
     @SuppressWarnings("null")
