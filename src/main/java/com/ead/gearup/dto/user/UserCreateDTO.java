@@ -1,5 +1,7 @@
 package com.ead.gearup.dto.user;
 
+import com.ead.gearup.enums.UserRole;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,5 +13,5 @@ public class UserCreateDTO {
     private String name;
     private String email;
     private String password;
-    private String role;
+    private UserRole role;
 }
