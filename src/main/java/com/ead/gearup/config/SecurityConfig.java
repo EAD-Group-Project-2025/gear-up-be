@@ -1,15 +1,15 @@
 package com.ead.gearup.config;
 
-import java.util.List;
+import com.ead.gearup.filter.JwtAuthenticationFilter;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,14 +18,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
-import com.ead.gearup.filter.JwtAuthenticationFilter;
-import com.ead.gearup.service.auth.CustomUserDetailsService;
-
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -33,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomUserDetailsService customUserDetailsService; // must implement UserDetailsService
 
     /**
      * Main Security Filter Chain
@@ -41,14 +38,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                // Disable CSRF for stateless JWT APIs
-                .csrf(customizer -> customizer.disable())
+                // Disable CSRF (stateless JWT)
+                .csrf(csrf -> csrf.disable())
 
-                // CORS configuration
+                // Enable CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
+                // Authorization rules
                 .authorizeHttpRequests(request -> request
-                        // Public endpoints
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -57,32 +54,28 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/public/**")
                         .permitAll()
-                        // Role-based endpoints
                         .requestMatchers("/auth/user/**").hasRole("USER")
                         .requestMatchers("/auth/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
 
-                // .formLogin(Customizer.withDefaults())
-                .httpBasic(Customizer.withDefaults())
-
-                // Stateless session (JWT)
+                // Stateless session
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Exception handling for REST APIs
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(
-                        (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                                authException.getMessage())))
+                // Custom exception handling for APIs
+                .exceptionHandling(ex -> ex.authenticationEntryPoint((req, res, authEx) -> {
+                    res.setContentType("application/json");
+                    res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    res.getWriter().write("{\"success\":false,\"message\":\"Unauthorized\"}");
+                }))
 
-                // Authentication provider
-                .authenticationProvider(authenticationProvider())
-
-                // Add JWT filter before Spring Security default filter
+                // Add JWT filter before UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .build();
     }
 
     /**
-     * Password encoder (BCrypt)
+     * BCrypt password encoder
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -90,18 +83,7 @@ public class SecurityConfig {
     }
 
     /**
-     * Authentication provider connecting UserDetailsService and PasswordEncoder
-     */
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(customUserDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
-    }
-
-    /**
-     * Authentication manager for programmatic authentication
+     * AuthenticationManager (no deprecated .and() / SecurityConfigurerAdapter)
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -112,23 +94,18 @@ public class SecurityConfig {
      * CORS configuration
      */
     @Bean
-    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000", // dev frontend
                 "https://your-production.com" // production frontend
         ));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowedHeaders(List.of("*")); // Allow all headers
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
-    }
-
-    @Bean
-    public CorsFilter corsFilter() {
-        return new CorsFilter(corsConfigurationSource());
     }
 }
