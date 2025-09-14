@@ -39,13 +39,13 @@ public class User {
     @JsonIgnore
     private String password;
 
-    @Column(name = "email_verified", nullable = false)
-    @Builder.Default
-    private Boolean isVerified = false;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
     private UserRole role = UserRole.PUBLIC; // default role
+
+    @Column(name = "email_verified", nullable = false)
+    @Builder.Default
+    private Boolean isVerified = false;
 
 }
