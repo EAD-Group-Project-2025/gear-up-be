@@ -10,7 +10,9 @@ import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
 import com.ead.gearup.service.UserService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.MediaType;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -20,13 +22,14 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<String> createUser(@RequestBody UserCreateDTO userCreateDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userCreateDTO));
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> createUser(@Valid @RequestBody UserCreateDTO userCreateDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.createUser(userCreateDTO));
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<String> getToken(@RequestBody UserLoginDTO userLoginDTO) {
+    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> getToken(@Valid @RequestBody UserLoginDTO userLoginDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.verifyUser(userLoginDTO));
     }
 }
