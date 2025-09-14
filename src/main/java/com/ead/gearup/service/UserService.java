@@ -1,0 +1,11 @@
+package com.ead.gearup.service;
+
+import com.ead.gearup.dto.user.UserCreateDTO;
+import com.ead.gearup.dto.user.UserLoginDTO;
+
+public interface UserService {
+
+    public String createUser(UserCreateDTO userCreateDTO);
+
+    public String verifyUser(UserLoginDTO userlLoginDTO);
+}
