@@ -22,7 +22,7 @@ import javax.crypto.SecretKey;
 
 @Service
 @RequiredArgsConstructor
-public class JWTService {
+public class JwtService {
 
     @Value("${jwt.secret}")
     private String secretKey;
