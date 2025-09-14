@@ -28,12 +28,13 @@ public class UserServiceIMPL implements UserService {
 
     @Override
     public String createUser(UserCreateDTO userCreateDTO) {
-        // Instantiate User entity
-        User user = new User();
 
-        user.setEmail(userCreateDTO.getEmail());
-        user.setName(userCreateDTO.getName());
-        user.setPassword(encoder.encode(userCreateDTO.getPassword()));
+        // Create User entity
+        User user = User.builder()
+                .email(userCreateDTO.getEmail())
+                .name(userCreateDTO.getName())
+                .password(encoder.encode(userCreateDTO.getPassword()))
+                .build();
 
         userRepository.save(user);
 
