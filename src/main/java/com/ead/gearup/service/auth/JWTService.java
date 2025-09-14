@@ -1,9 +1,11 @@
 package com.ead.gearup.service.auth;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -29,17 +31,25 @@ public class JWTService {
     @Value("${jwt.expiration}")
     private long jwtExpirationMillis;
 
-    @Value("${jwt.refresh.expiration:604800000}") // 7 days default
+    @Value("${jwt.refresh.expiration:604800000}") // default 7 days
     private long refreshTokenDurationMs;
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(userDetails, new HashMap<>());
+    /**
+     * Generate an access token (short-lived)
+     */
+    public String generateAccessToken(UserDetails userDetails) {
+        return generateAccessToken(userDetails, new HashMap<>());
     }
 
-    public String generateToken(UserDetails userDetails, Map<String, Object> extraClaims) {
+    public String generateAccessToken(UserDetails userDetails, Map<String, Object> extraClaims) {
+        extraClaims.put("roles", userDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList());
+        extraClaims.put("token_type", "access");
+
         return Jwts.builder()
                 .claims(extraClaims)
-                .claim("role", userDetails.getAuthorities().iterator().next().getAuthority())
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationMillis))
@@ -47,10 +57,20 @@ public class JWTService {
                 .compact();
     }
 
+    /**
+     * Generate a refresh token (long-lived)
+     */
     public String generateRefreshToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", userDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList());
+        claims.put("token_type", "refresh");
+
         return Jwts.builder()
+                .claims(claims)
                 .subject(userDetails.getUsername())
-                .claim("role", userDetails.getAuthorities().iterator().next().getAuthority())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenDurationMs))
                 .signWith(getSignKey())
@@ -62,22 +82,34 @@ public class JWTService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
+    /**
+     * Validate an access token
+     */
+    public boolean validateAccessToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final String type = extractClaim(token, claims -> claims.get("token_type", String.class));
+        return username.equals(userDetails.getUsername())
+                && !isTokenExpired(token)
+                && "access".equals(type);
     }
 
+    /**
+     * Validate a refresh token
+     */
     public boolean validateRefreshToken(String refreshToken, UserDetails userDetails) {
         final String username = extractUsername(refreshToken);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(refreshToken));
+        final String type = extractClaim(refreshToken, claims -> claims.get("token_type", String.class));
+        return username.equals(userDetails.getUsername())
+                && !isTokenExpired(refreshToken)
+                && "refresh".equals(type);
     }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public String extractRole(String token) {
-        return extractClaim(token, claims -> claims.get("role", String.class));
+    public List<String> extractRoles(String token) {
+        return extractClaim(token, claims -> claims.get("roles", List.class));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -108,5 +140,4 @@ public class JWTService {
     public long getRefreshTokenDurationMs() {
         return refreshTokenDurationMs;
     }
-
 }
