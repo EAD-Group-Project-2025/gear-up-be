@@ -109,7 +109,13 @@ public class JWTService {
     }
 
     public List<String> extractRoles(String token) {
-        return extractClaim(token, claims -> claims.get("roles", List.class));
+        return extractClaim(token, claims -> {
+            List<?> roles = claims.get("roles", List.class);
+            return roles.stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .toList();
+        });
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
