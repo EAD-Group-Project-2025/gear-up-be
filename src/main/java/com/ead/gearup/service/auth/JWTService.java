@@ -1,8 +1,7 @@
 package com.ead.gearup.service.auth;
 
-import java.util.List;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,10 +41,12 @@ public class JWTService {
     }
 
     public String generateAccessToken(UserDetails userDetails, Map<String, Object> extraClaims) {
-        extraClaims.put("roles", userDetails.getAuthorities()
-                .stream()
+        String role = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .toList());
+                .findFirst()
+                .orElse("ROLE_USER");
+
+        extraClaims.put("role", role);
         extraClaims.put("token_type", "access");
 
         return Jwts.builder()
@@ -61,11 +62,13 @@ public class JWTService {
      * Generate a refresh token (long-lived)
      */
     public String generateRefreshToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", userDetails.getAuthorities()
-                .stream()
+        String role = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .toList());
+                .findFirst()
+                .orElse("ROLE_USER");
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
         claims.put("token_type", "refresh");
 
         return Jwts.builder()
@@ -108,14 +111,8 @@ public class JWTService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public List<String> extractRoles(String token) {
-        return extractClaim(token, claims -> {
-            List<?> roles = claims.get("roles", List.class);
-            return roles.stream()
-                    .filter(String.class::isInstance)
-                    .map(String.class::cast)
-                    .toList();
-        });
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
