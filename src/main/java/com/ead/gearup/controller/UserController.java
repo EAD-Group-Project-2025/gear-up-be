@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ead.gearup.dto.response.ApiResponseDTO;
 import com.ead.gearup.dto.response.LoginResponseDTO;
+import com.ead.gearup.dto.response.UserResponseDTO;
 import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
 import com.ead.gearup.service.UserService;
@@ -29,9 +30,20 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> createUser(@Valid @RequestBody UserCreateDTO userCreateDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.createUser(userCreateDTO));
+    public ResponseEntity<ApiResponseDTO<UserResponseDTO>> createUser(@Valid @RequestBody UserCreateDTO userCreateDTO,
+            HttpServletRequest request) {
+
+        UserResponseDTO createdUser = userService.createUser(userCreateDTO);
+
+        ApiResponseDTO<UserResponseDTO> apiResponse = ApiResponseDTO.<UserResponseDTO>builder()
+                .status("success")
+                .message("User created successfully!")
+                .data(createdUser)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
