@@ -8,10 +8,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.ead.gearup.dto.response.LoginResponseDTO;
+import com.ead.gearup.dto.response.JwtTokensDTO;
 import com.ead.gearup.dto.response.UserResponseDTO;
 import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
+import com.ead.gearup.exception.EmailAlreadyExistsException;
 import com.ead.gearup.model.User;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.UserService;
@@ -31,6 +32,10 @@ public class UserServiceIMPL implements UserService {
     @Override
     public UserResponseDTO createUser(UserCreateDTO userCreateDTO) {
 
+        if (userRepository.findByEmail(userCreateDTO.getEmail()) != null) {
+            throw new EmailAlreadyExistsException(userCreateDTO.getEmail());
+        }
+
         User user = User.builder()
                 .email(userCreateDTO.getEmail())
                 .name(userCreateDTO.getName())
@@ -43,7 +48,7 @@ public class UserServiceIMPL implements UserService {
         return new UserResponseDTO(user.getEmail(), user.getName());
     }
 
-    public LoginResponseDTO verifyUser(UserLoginDTO userLoginDTO) {
+    public JwtTokensDTO verifyUser(UserLoginDTO userLoginDTO) {
         Authentication authentication = authManager
                 .authenticate(
                         new UsernamePasswordAuthenticationToken(userLoginDTO.getEmail(), userLoginDTO.getPassword()));
@@ -57,6 +62,6 @@ public class UserServiceIMPL implements UserService {
         String accessToken = jwtService.generateAccessToken(userDetails);
         String refreshToken = jwtService.generateRefreshToken(userDetails);
 
-        return new LoginResponseDTO(accessToken, refreshToken);
+        return new JwtTokensDTO(accessToken, refreshToken);
     }
 }
