@@ -1,7 +1,9 @@
 package com.ead.gearup.controller;
 
+import java.time.Duration;
 import java.time.Instant;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,14 +11,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ead.gearup.dto.response.ApiResponseDTO;
+import com.ead.gearup.dto.response.JwtTokensDTO;
 import com.ead.gearup.dto.response.LoginResponseDTO;
 import com.ead.gearup.dto.response.UserResponseDTO;
 import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
 import com.ead.gearup.service.UserService;
+import com.ead.gearup.service.auth.JwtService;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -27,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
 
+    private final JwtService jwtService;
     private final UserService userService;
 
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -50,7 +56,19 @@ public class UserController {
     public ResponseEntity<ApiResponseDTO<LoginResponseDTO>> getToken(@Valid @RequestBody UserLoginDTO userLoginDTO,
             HttpServletRequest request) {
 
-        LoginResponseDTO loginResponse = userService.verifyUser(userLoginDTO);
+        JwtTokensDTO tokens = userService.verifyUser(userLoginDTO);
+
+        // HttpOnly refresh token cookie
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/auth/refresh")
+                .maxAge(Duration.ofMillis(jwtService.getRefreshTokenDurationMs()))
+                .sameSite("None")
+                .build();
+
+        LoginResponseDTO loginResponse = new LoginResponseDTO();
+        loginResponse.setAccessToken(tokens.getAccessToken());
 
         ApiResponseDTO<LoginResponseDTO> apiResponse = ApiResponseDTO.<LoginResponseDTO>builder()
                 .status("success")
@@ -60,6 +78,8 @@ public class UserController {
                 .path(request.getRequestURI())
                 .build();
 
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(apiResponse);
     }
 }
