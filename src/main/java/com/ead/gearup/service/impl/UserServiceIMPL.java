@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ead.gearup.dto.response.LoginResponseDTO;
 import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
 import com.ead.gearup.model.User;
@@ -41,7 +42,7 @@ public class UserServiceIMPL implements UserService {
         return "User created successfully!";
     }
 
-    public String verifyUser(UserLoginDTO userLoginDTO) {
+    public LoginResponseDTO verifyUser(UserLoginDTO userLoginDTO) {
         Authentication authentication = authManager
                 .authenticate(
                         new UsernamePasswordAuthenticationToken(userLoginDTO.getEmail(), userLoginDTO.getPassword()));
@@ -52,6 +53,9 @@ public class UserServiceIMPL implements UserService {
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        return jwtService.generateAccessToken(userDetails);
+        String accessToken = jwtService.generateAccessToken(userDetails);
+        String refreshToken = jwtService.generateRefreshToken(userDetails);
+
+        return new LoginResponseDTO(accessToken, refreshToken);
     }
 }
