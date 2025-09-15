@@ -1,5 +1,6 @@
 package com.ead.gearup.dto.user;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -24,5 +25,6 @@ public class UserCreateDTO {
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters long")
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).*$", message = "Password must contain uppercase, lowercase, number, and special character")
+    @Schema(example = "string")    
     private String password;
 }
