@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.ead.gearup.dto.response.LoginResponseDTO;
+import com.ead.gearup.dto.response.UserResponseDTO;
 import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
 import com.ead.gearup.model.User;
@@ -28,9 +29,8 @@ public class UserServiceIMPL implements UserService {
     private final JwtService jwtService;
 
     @Override
-    public String createUser(UserCreateDTO userCreateDTO) {
+    public UserResponseDTO createUser(UserCreateDTO userCreateDTO) {
 
-        // Create User entity
         User user = User.builder()
                 .email(userCreateDTO.getEmail())
                 .name(userCreateDTO.getName())
@@ -39,7 +39,8 @@ public class UserServiceIMPL implements UserService {
 
         userRepository.save(user);
 
-        return "User created successfully!";
+        // Return created user info (without password)
+        return new UserResponseDTO(user.getEmail(), user.getName());
     }
 
     public LoginResponseDTO verifyUser(UserLoginDTO userLoginDTO) {
