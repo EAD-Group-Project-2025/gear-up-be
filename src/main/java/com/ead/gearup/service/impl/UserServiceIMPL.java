@@ -14,6 +14,7 @@ import com.ead.gearup.dto.response.UserResponseDTO;
 import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
 import com.ead.gearup.exception.EmailAlreadyExistsException;
+import com.ead.gearup.exception.InvalidRefreshTokenException;
 import com.ead.gearup.model.User;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.UserService;
@@ -73,7 +74,7 @@ public class UserServiceIMPL implements UserService {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 
         if (!jwtService.validateRefreshToken(refreshToken, userDetails)) {
-            throw new RuntimeException("Invalid or expired refresh token");
+            throw new InvalidRefreshTokenException("Invalid or expired refresh token");
         }
 
         String newAccessToken = jwtService.generateAccessToken(userDetails);
