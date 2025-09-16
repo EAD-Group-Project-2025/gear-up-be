@@ -107,4 +107,45 @@ public class UserController {
 
         return ResponseEntity.ok(apiResponse);
     }
+    
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponseDTO<Object>> logout(
+        @CookieValue(name = "refreshToken", required = false) String refreshToken,
+        HttpServletRequest request) {
+
+        if (refreshToken == null || refreshToken.isEmpty()) {
+                ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                        .status("error")
+                        .message("No active session found or already logged out")
+                        .data(null)
+                        .timestamp(Instant.now())
+                        .path(request.getRequestURI())
+                        .build();
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        // Clear the refresh token cookie
+        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/auth/refresh")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+
+        ApiResponseDTO<Object> apiResponse = ApiResponseDTO.builder()
+                .status("success")
+                .message("Logged out successfully")
+                .data(null)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .body(apiResponse);
+    }
 }
