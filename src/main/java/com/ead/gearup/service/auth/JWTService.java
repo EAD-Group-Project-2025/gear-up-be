@@ -30,7 +30,7 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long jwtExpirationMillis;
 
-    @Value("${jwt.refresh.expiration:604800000}") // default 7 days
+    @Value("${jwt.refresh.expiration}")
     private long refreshTokenDurationMs;
 
     /**
@@ -44,7 +44,7 @@ public class JwtService {
         String role = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .findFirst()
-                .orElse("ROLE_USER");
+                .orElse("ROLE_PUBLIC");
 
         extraClaims.put("role", role);
         extraClaims.put("token_type", "access");
@@ -65,7 +65,7 @@ public class JwtService {
         String role = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .findFirst()
-                .orElse("ROLE_USER");
+                .orElse("ROLE_PUBLIC");
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
