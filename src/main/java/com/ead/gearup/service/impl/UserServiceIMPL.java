@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.ead.gearup.dto.response.JwtTokensDTO;
+import com.ead.gearup.dto.response.LoginResponseDTO;
 import com.ead.gearup.dto.response.UserResponseDTO;
 import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
@@ -16,6 +17,7 @@ import com.ead.gearup.exception.EmailAlreadyExistsException;
 import com.ead.gearup.model.User;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.UserService;
+import com.ead.gearup.service.auth.CustomUserDetailsService;
 import com.ead.gearup.service.auth.JwtService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class UserServiceIMPL implements UserService {
     private final UserRepository userRepository;
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Override
     public UserResponseDTO createUser(UserCreateDTO userCreateDTO) {
@@ -63,5 +66,21 @@ public class UserServiceIMPL implements UserService {
         String refreshToken = jwtService.generateRefreshToken(userDetails);
 
         return new JwtTokensDTO(accessToken, refreshToken);
+    }
+
+    public LoginResponseDTO getRefreshAccessToken(String refreshToken) {
+        String username = jwtService.extractUsername(refreshToken);
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+
+        if (!jwtService.validateRefreshToken(refreshToken, userDetails)) {
+            throw new RuntimeException("Invalid or expired refresh token");
+        }
+
+        String newAccessToken = jwtService.generateAccessToken(userDetails);
+
+        LoginResponseDTO loginResponse = new LoginResponseDTO();
+        loginResponse.setAccessToken(newAccessToken);
+
+        return loginResponse;
     }
 }
