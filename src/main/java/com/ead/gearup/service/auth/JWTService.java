@@ -55,6 +55,8 @@ public class JwtService {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationMillis))
                 .signWith(getSignKey())
+                .header().add("typ", "JWT")
+                .and()
                 .compact();
     }
 
@@ -77,6 +79,8 @@ public class JwtService {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenDurationMs))
                 .signWith(getSignKey())
+                .header().add("typ", "JWT")
+                .and()
                 .compact();
     }
 
