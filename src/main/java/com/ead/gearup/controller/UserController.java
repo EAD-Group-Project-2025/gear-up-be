@@ -6,6 +6,7 @@ import java.time.Instant;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,7 +37,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseDTO<UserResponseDTO>> createUser(@Valid @RequestBody UserCreateDTO userCreateDTO,
+    public ResponseEntity<ApiResponseDTO<UserResponseDTO>> createUser(
+            @Valid @RequestBody UserCreateDTO userCreateDTO,
             HttpServletRequest request) {
 
         UserResponseDTO createdUser = userService.createUser(userCreateDTO);
@@ -53,7 +55,8 @@ public class UserController {
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseDTO<LoginResponseDTO>> getToken(@Valid @RequestBody UserLoginDTO userLoginDTO,
+    public ResponseEntity<ApiResponseDTO<LoginResponseDTO>> verifyUser(
+            @Valid @RequestBody UserLoginDTO userLoginDTO,
             HttpServletRequest request) {
 
         JwtTokensDTO tokens = userService.verifyUser(userLoginDTO);
@@ -81,5 +84,27 @@ public class UserController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                 .body(apiResponse);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponseDTO<LoginResponseDTO>> refreshToken(
+            @CookieValue(name = "refreshToken", required = false) String refreshToken,
+            HttpServletRequest request) {
+
+        if (refreshToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        LoginResponseDTO loginResponse = userService.getRefreshAccessToken(refreshToken);
+
+        ApiResponseDTO<LoginResponseDTO> apiResponse = ApiResponseDTO.<LoginResponseDTO>builder()
+                .status("success")
+                .message("Token refreshed successfully")
+                .data(loginResponse)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
     }
 }
