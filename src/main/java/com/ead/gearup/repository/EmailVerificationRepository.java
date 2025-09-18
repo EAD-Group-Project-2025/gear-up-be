@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ead.gearup.model.EmailVerification;
-import com.ead.gearup.model.User;
 
 @Repository
 public interface EmailVerificationRepository extends JpaRepository<EmailVerification, Long> {
@@ -29,6 +28,4 @@ public interface EmailVerificationRepository extends JpaRepository<EmailVerifica
     @Query("DELETE FROM EmailVerification e WHERE e.expiresAt < :currentTime")
     void deleteExpiredOtps(@Param("currentTime") LocalDateTime currentTime);
 
-    @Query("SELECT e.user FROM EmailVerification e WHERE e.otp = :otp")
-    Optional<User> findUserByOtp(@Param("otp") String otp);
 }
