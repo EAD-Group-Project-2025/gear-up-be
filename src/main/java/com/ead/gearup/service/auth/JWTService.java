@@ -84,6 +84,21 @@ public class JwtService {
                 .compact();
     }
 
+    public String generateEmailVerificationToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("token_type", "email_verification");
+
+        return Jwts.builder()
+                .claims(claims)
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 5 * 60 * 1000)) // 5 min
+                .signWith(getSignKey())
+                .header().add("typ", "JWT")
+                .and()
+                .compact();
+    }
+
     private SecretKey getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
