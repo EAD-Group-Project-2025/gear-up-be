@@ -34,11 +34,8 @@ public class EmailVerificationService {
 
             String verificationUrl = appBaseUrl + "/api/auth/v1/verify-email?token=" + token;
 
-            String subject = "Verify Your Email";
-            String content = "Click the link to verify your email: " + verificationUrl;
-
             // Send email
-            emailService.sendVerificationEmail(user.getEmail(), subject, content);
+            emailService.sendVerificationEmail(user.getEmail(), user.getName(), verificationUrl);
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to send verification email: " + e.getMessage(), e);
