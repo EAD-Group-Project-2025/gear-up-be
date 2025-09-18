@@ -7,9 +7,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.ead.gearup.dto.response.ApiResponseDTO;
 import com.ead.gearup.dto.response.JwtTokensDTO;
@@ -35,7 +38,7 @@ public class UserController {
 
     private final JwtService jwtService;
     private final UserService userService;
-
+        
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseDTO<UserResponseDTO>> createUser(
             @Valid @RequestBody UserCreateDTO userCreateDTO,
@@ -54,6 +57,16 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
 
+    @GetMapping("/verify-email")
+    public RedirectView verifyEmail(@RequestParam("otp") String otp) {
+        String result = userService.validateEmailVerificationToken(otp);
+        if ("valid".equals(result)) {
+                return new RedirectView("/success.html");
+        } else {
+                return new RedirectView("/error.html");
+        }
+    }
+    
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseDTO<LoginResponseDTO>> verifyUser(
             @Valid @RequestBody UserLoginDTO userLoginDTO,
