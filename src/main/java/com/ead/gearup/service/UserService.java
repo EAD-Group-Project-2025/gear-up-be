@@ -15,6 +15,7 @@ import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
 import com.ead.gearup.exception.EmailAlreadyExistsException;
 import com.ead.gearup.exception.InvalidRefreshTokenException;
+import com.ead.gearup.exception.UsernameNotFoundException;
 import com.ead.gearup.model.User;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.auth.CustomUserDetailsService;
@@ -55,10 +56,30 @@ public class UserService {
         return new UserResponseDTO(user.getEmail(), user.getName());
     }
 
-    public String validateEmailVerificationToken(String otp) {
-        boolean verify = emailVerificationService.verifyOTP(otp);
+    public boolean verifyEmailToken(String token) {
+        try {
+            String username = jwtService.extractUsername(token);
+            String tokenType = jwtService.extractClaim(token, claims -> claims.get("token_type", String.class));
 
-        return verify ? "valid" : "invalid";
+            if (!"email_verification".equals(tokenType)) {
+                return false;
+            }
+
+            User user = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+            if (user.getIsVerified()) {
+                return true; // already verified
+            }
+
+            user.setIsVerified(true);
+            userRepository.save(user);
+
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public JwtTokensDTO verifyUser(UserLoginDTO userLoginDTO) {
