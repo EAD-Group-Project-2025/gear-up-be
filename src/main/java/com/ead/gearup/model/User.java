@@ -48,4 +48,5 @@ public class User {
     @Builder.Default
     private Boolean isVerified = false;
 
+    private String emailVerificationToken;
 }
