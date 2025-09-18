@@ -2,5 +2,5 @@ package com.ead.gearup.service;
 
 public interface EmailService {
 
-    public void sendEmail(String to, String subject, String text);
+    public void sendVerificationEmail(String to, String subject, String text);
 }
