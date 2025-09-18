@@ -16,8 +16,8 @@ import com.ead.gearup.model.User;
 @Repository
 public interface EmailVerificationRepository extends JpaRepository<EmailVerification, Long> {
 
-    Optional<EmailVerification> findByUserAndOtpAndIsUsedFalseAndExpiresAtAfter(
-            User user, String otp, LocalDateTime currentTime);
+    Optional<EmailVerification> findByOtpAndIsUsedFalseAndExpiresAtAfter(
+            String otp, LocalDateTime currentTime);
 
     @Modifying
     @Transactional
