@@ -58,15 +58,12 @@ public class UserController {
     }
 
     @GetMapping("/verify-email")
-    public RedirectView verifyEmail(@RequestParam("otp") String otp) {
-        String result = userService.validateEmailVerificationToken(otp);
-        if ("valid".equals(result)) {
-                return new RedirectView("/success.html");
-        } else {
-                return new RedirectView("/error.html");
-        }
+    public RedirectView verifyEmail(@RequestParam("token") String token) {
+        boolean verified = userService.verifyEmailToken(token);
+
+        return new RedirectView(verified ? "/success.html" : "/error.html");
     }
-    
+
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseDTO<LoginResponseDTO>> verifyUser(
             @Valid @RequestBody UserLoginDTO userLoginDTO,
