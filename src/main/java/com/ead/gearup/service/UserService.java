@@ -15,7 +15,7 @@ import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
 import com.ead.gearup.exception.EmailAlreadyExistsException;
 import com.ead.gearup.exception.InvalidRefreshTokenException;
-import com.ead.gearup.exception.UsernameNotFoundException;
+import com.ead.gearup.exception.UserNotFoundException;
 import com.ead.gearup.model.User;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.auth.CustomUserDetailsService;
@@ -66,7 +66,7 @@ public class UserService {
             }
 
             User user = userRepository.findByEmail(username)
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                    .orElseThrow(() -> new UserNotFoundException("User not found"));
 
             if (user.getIsVerified()) {
                 return true; // already verified
