@@ -33,6 +33,9 @@ public class JwtService {
     @Value("${jwt.refresh.expiration}")
     private long refreshTokenDurationMs;
 
+    @Value("${jwt.email_verification.expiration}")
+    private long emailVerificationTokenDurationMs;
+
     /**
      * Generate an access token (short-lived)
      */
@@ -92,7 +95,7 @@ public class JwtService {
                 .claims(claims)
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 5 * 60 * 1000)) // 5 min
+                .expiration(new Date(System.currentTimeMillis() + emailVerificationTokenDurationMs))
                 .signWith(getSignKey())
                 .header().add("typ", "JWT")
                 .and()
