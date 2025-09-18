@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import com.ead.gearup.exception.EmailSendingException;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
@@ -40,7 +42,7 @@ public class EmailService {
             mailSender.send(message);
 
         } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send verification email: " + e.getMessage(), e);
+            throw new EmailSendingException("Failed to send verification email: " + e.getMessage(), e);
         }
     }
 }

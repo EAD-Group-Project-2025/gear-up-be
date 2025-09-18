@@ -1,5 +1,6 @@
 package com.ead.gearup.service.auth;
 
+import com.ead.gearup.exception.EmailNotVerifiedException;
 import com.ead.gearup.model.User;
 import com.ead.gearup.model.UserPrinciple;
 import com.ead.gearup.repository.UserRepository;
@@ -24,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         if (!user.getIsVerified()) {
-            throw new RuntimeException("Email not verified");
+            throw new EmailNotVerifiedException("Email not verified");
         }
 
         return new UserPrinciple(user);
