@@ -1,11 +1,8 @@
 package com.ead.gearup.model;
 
-import java.util.List;
-
 import com.ead.gearup.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,7 +10,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -51,8 +47,5 @@ public class User {
     @Column(name = "email_verified", nullable = false)
     @Builder.Default
     private Boolean isVerified = false;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EmailVerification> emailVerifications;
 
 }
