@@ -106,10 +106,10 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
-        // Handle email already exists exception
-        @ExceptionHandler(UsernameNotFoundException.class)
-        public ResponseEntity<ApiResponseDTO<Object>> handleUsernameNotFound(
-                        UsernameNotFoundException ex,
+        // Handle user not found exception
+        @ExceptionHandler(UserNotFoundException.class)
+        public ResponseEntity<ApiResponseDTO<Object>> handleUserNotFound(
+                        UserNotFoundException ex,
                         HttpServletRequest request) {
 
                 ApiResponseDTO<Object> response = ApiResponseDTO.builder()
@@ -140,7 +140,7 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         }
 
-        // Handle email not varified exception
+        // Handle email not sending exception
         @ExceptionHandler(EmailSendingException.class)
         public ResponseEntity<ApiResponseDTO<Object>> handleEmailSending(
                         EmailSendingException ex,
@@ -155,5 +155,22 @@ public class GlobalExceptionHandler {
                                 .build();
 
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
+        // Handle email not sending exception
+        @ExceptionHandler(AccessDeniedException.class)
+        public ResponseEntity<ApiResponseDTO<Object>> handleAccessDenied(
+                        AccessDeniedException ex,
+                        HttpServletRequest request) {
+
+                ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                                .status("error")
+                                .message(ex.getMessage())
+                                .timestamp(Instant.now())
+                                .path(request.getRequestURI())
+                                .data(null)
+                                .build();
+
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 }
