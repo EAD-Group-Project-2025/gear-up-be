@@ -1,5 +1,9 @@
 package com.ead.gearup.model;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.ead.gearup.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -48,4 +52,10 @@ public class User {
     @Builder.Default
     private Boolean isVerified = false;
 
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
 }
