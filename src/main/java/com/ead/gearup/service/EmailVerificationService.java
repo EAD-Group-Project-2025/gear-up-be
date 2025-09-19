@@ -19,9 +19,6 @@ public class EmailVerificationService {
     private final EmailService emailService;
     private final JwtService jwtService;
 
-    @Value("${otp.expiration}")
-    private int otpExpiration;
-
     @Value("${app.base-url}")
     private String appBaseUrl;
 
