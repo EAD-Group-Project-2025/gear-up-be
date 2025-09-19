@@ -175,7 +175,7 @@ public class GlobalExceptionHandler {
                                 .data(null)
                                 .build();
 
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         }
 
         // Handle database integrity violations (e.g., duplicate email)
