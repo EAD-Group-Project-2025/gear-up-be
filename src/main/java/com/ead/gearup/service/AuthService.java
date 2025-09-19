@@ -96,6 +96,17 @@ public class AuthService {
         }
     }
 
+    public void resendEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (user.getIsVerified()) {
+            throw new IllegalStateException("User is already verified");
+        }
+
+        emailVerificationService.sendVerificationEmail(user);
+    }
+
     public JwtTokensDTO verifyUser(UserLoginDTO userLoginDTO) {
         Authentication authentication = authManager
                 .authenticate(

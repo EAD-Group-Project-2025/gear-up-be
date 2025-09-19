@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.view.RedirectView;
 
+import com.ead.gearup.dto.request.ResendEmailRequestDTO;
 import com.ead.gearup.dto.response.ApiResponseDTO;
 import com.ead.gearup.dto.response.JwtTokensDTO;
 import com.ead.gearup.dto.response.LoginResponseDTO;
@@ -37,14 +37,14 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final JwtService jwtService;
-    private final AuthService userService;
+    private final AuthService authService;
 
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseDTO<UserResponseDTO>> createUser(
             @Valid @RequestBody UserCreateDTO userCreateDTO,
             HttpServletRequest request) {
 
-        UserResponseDTO createdUser = userService.createUser(userCreateDTO);
+        UserResponseDTO createdUser = authService.createUser(userCreateDTO);
 
         ApiResponseDTO<UserResponseDTO> apiResponse = ApiResponseDTO.<UserResponseDTO>builder()
                 .status("success")
@@ -58,10 +58,41 @@ public class AuthController {
     }
 
     @GetMapping("/verify-email")
-    public RedirectView verifyEmail(@RequestParam("token") String token) {
-        boolean verified = userService.verifyEmailToken(token);
+    public ResponseEntity<ApiResponseDTO<Object>> verifyEmail(
+            @RequestParam("token") String token,
+            HttpServletRequest request) {
 
-        return new RedirectView(verified ? "/success.html" : "/error.html");
+        boolean verified = authService.verifyEmailToken(token);
+
+        ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                .status(verified ? "success" : "error")
+                .message(verified ? "Email verified successfully!" : "Invalid or expired verification token")
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(null)
+                .build();
+
+        return verified
+                ? ResponseEntity.ok(response)
+                : ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @PostMapping("/resend-email")
+    public ResponseEntity<ApiResponseDTO<Object>> resendEmail(
+            @Valid @RequestBody ResendEmailRequestDTO request,
+            HttpServletRequest httpRequest) {
+
+        authService.resendEmail(request.getEmail());
+
+        ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                .status("success")
+                .message("Verification email resent successfully")
+                .timestamp(Instant.now())
+                .path(httpRequest.getRequestURI())
+                .data(null)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -69,7 +100,7 @@ public class AuthController {
             @Valid @RequestBody UserLoginDTO userLoginDTO,
             HttpServletRequest request) {
 
-        JwtTokensDTO tokens = userService.verifyUser(userLoginDTO);
+        JwtTokensDTO tokens = authService.verifyUser(userLoginDTO);
 
         // HttpOnly refresh token cookie
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
@@ -105,7 +136,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        LoginResponseDTO loginResponse = userService.getRefreshAccessToken(refreshToken);
+        LoginResponseDTO loginResponse = authService.getRefreshAccessToken(refreshToken);
 
         ApiResponseDTO<LoginResponseDTO> apiResponse = ApiResponseDTO.<LoginResponseDTO>builder()
                 .status("success")
