@@ -38,7 +38,7 @@ public class UserController {
 
     private final JwtService jwtService;
     private final UserService userService;
-        
+
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseDTO<UserResponseDTO>> createUser(
             @Valid @RequestBody UserCreateDTO userCreateDTO,
@@ -48,14 +48,14 @@ public class UserController {
 
         ApiResponseDTO<UserResponseDTO> apiResponse = ApiResponseDTO.<UserResponseDTO>builder()
                 .status("success")
-                .message("User created successfully!")
+                .message("User registered successfully! Please verify your email to activate your account.")
                 .data(createdUser)
                 .timestamp(Instant.now())
                 .path(request.getRequestURI())
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
-    }
+    }    
 
     @GetMapping("/verify-email")
     public RedirectView verifyEmail(@RequestParam("token") String token) {
