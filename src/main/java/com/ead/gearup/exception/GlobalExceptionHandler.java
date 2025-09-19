@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -210,5 +211,39 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    // Handle already verified user
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponseDTO<Object>> handleIllegalState(
+            IllegalStateException ex,
+            HttpServletRequest request) {
+
+        ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                .status("error")
+                .message(ex.getMessage())
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(null)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // Handle email not verified
+    @ExceptionHandler(InternalAuthenticationServiceException.class)
+    public ResponseEntity<ApiResponseDTO<Object>> handleInternalAuthenticationService(
+            InternalAuthenticationServiceException ex,
+            HttpServletRequest request) {
+
+        ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                .status("error")
+                .message(ex.getMessage())
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(null)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }
