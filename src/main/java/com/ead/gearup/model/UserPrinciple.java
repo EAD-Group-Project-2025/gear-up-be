@@ -18,6 +18,10 @@ public class UserPrinciple implements UserDetails {
         return user.getUserId();
     }
 
+    public User getUser() {
+        return user;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + this.user.getRole().name()));
