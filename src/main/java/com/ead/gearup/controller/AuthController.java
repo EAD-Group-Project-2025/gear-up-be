@@ -20,7 +20,7 @@ import com.ead.gearup.dto.response.LoginResponseDTO;
 import com.ead.gearup.dto.response.UserResponseDTO;
 import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
-import com.ead.gearup.service.UserService;
+import com.ead.gearup.service.AuthService;
 import com.ead.gearup.service.auth.JwtService;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,10 +34,10 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auth/v1")
 @RequiredArgsConstructor
-public class UserController {
+public class AuthController {
 
     private final JwtService jwtService;
-    private final UserService userService;
+    private final AuthService userService;
 
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseDTO<UserResponseDTO>> createUser(
@@ -55,7 +55,7 @@ public class UserController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
-    }    
+    }
 
     @GetMapping("/verify-email")
     public RedirectView verifyEmail(@RequestParam("token") String token) {
@@ -117,24 +117,22 @@ public class UserController {
 
         return ResponseEntity.ok(apiResponse);
     }
-    
-
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponseDTO<Object>> logout(
-        @CookieValue(name = "refreshToken", required = false) String refreshToken,
-        HttpServletRequest request) {
+            @CookieValue(name = "refreshToken", required = false) String refreshToken,
+            HttpServletRequest request) {
 
         if (refreshToken == null || refreshToken.isEmpty()) {
-                ApiResponseDTO<Object> response = ApiResponseDTO.builder()
-                        .status("error")
-                        .message("No active session found or already logged out")
-                        .data(null)
-                        .timestamp(Instant.now())
-                        .path(request.getRequestURI())
-                        .build();
+            ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                    .status("error")
+                    .message("No active session found or already logged out")
+                    .data(null)
+                    .timestamp(Instant.now())
+                    .path(request.getRequestURI())
+                    .build();
 
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
         // Clear the refresh token cookie

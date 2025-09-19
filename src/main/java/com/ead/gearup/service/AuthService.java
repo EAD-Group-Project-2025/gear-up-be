@@ -34,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class UserService {
+public class AuthService {
 
     private final PasswordEncoder encoder;
     private final UserRepository userRepository;
