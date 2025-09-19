@@ -79,10 +79,10 @@ public class AuthController {
 
     @PostMapping("/resend-email")
     public ResponseEntity<ApiResponseDTO<Object>> resendEmail(
-            @Valid @RequestBody ResendEmailRequestDTO request,
+            @Valid @RequestBody ResendEmailRequestDTO resendEmailRequestDTO,
             HttpServletRequest httpRequest) {
 
-        authService.resendEmail(request.getEmail());
+        authService.resendEmail(resendEmailRequestDTO);
 
         ApiResponseDTO<Object> response = ApiResponseDTO.builder()
                 .status("success")

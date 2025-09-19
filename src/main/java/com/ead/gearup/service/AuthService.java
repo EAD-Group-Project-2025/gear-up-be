@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ead.gearup.dto.request.ResendEmailRequestDTO;
 import com.ead.gearup.dto.response.JwtTokensDTO;
 import com.ead.gearup.dto.response.LoginResponseDTO;
 import com.ead.gearup.dto.response.UserResponseDTO;
@@ -18,6 +19,7 @@ import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
 import com.ead.gearup.exception.EmailAlreadyExistsException;
 import com.ead.gearup.exception.InvalidRefreshTokenException;
+import com.ead.gearup.exception.ResendEmailCooldownException;
 import com.ead.gearup.exception.UserNotFoundException;
 import com.ead.gearup.model.User;
 import com.ead.gearup.model.UserPrinciple;
@@ -42,6 +44,8 @@ public class AuthService {
     private final JwtService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
     private final EmailVerificationService emailVerificationService;
+
+    private static final int COOLDOWN_MINUTES = 5;
 
     public UserResponseDTO createUser(UserCreateDTO userCreateDTO) {
 
@@ -96,7 +100,9 @@ public class AuthService {
         }
     }
 
-    public void resendEmail(String email) {
+    public void resendEmail(ResendEmailRequestDTO resendEmailRequestDTO) {
+
+        String email = resendEmailRequestDTO.getEmail().trim().toLowerCase();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
@@ -104,7 +110,21 @@ public class AuthService {
             throw new IllegalStateException("User is already verified");
         }
 
+        // Cooldown check
+        if (user.getLastVerificationEmailSent() != null &&
+                user.getLastVerificationEmailSent()
+                        .isAfter(java.time.LocalDateTime.now().minusMinutes(COOLDOWN_MINUTES))) {
+            long waitMinutes = COOLDOWN_MINUTES - java.time.Duration.between(
+                    user.getLastVerificationEmailSent(), java.time.LocalDateTime.now()).toMinutes();
+            throw new ResendEmailCooldownException("Please wait " + waitMinutes + " minutes before requesting again");
+        }
+
         emailVerificationService.sendVerificationEmail(user);
+
+        // Update last sent timestamp
+        user.setLastVerificationEmailSent(java.time.LocalDateTime.now());
+        userRepository.save(user);
+
     }
 
     public JwtTokensDTO verifyUser(UserLoginDTO userLoginDTO) {
