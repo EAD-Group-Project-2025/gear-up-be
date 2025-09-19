@@ -1,7 +1,11 @@
 package com.ead.gearup.exception;
 
 import com.ead.gearup.dto.response.ApiResponseDTO;
+
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -166,6 +170,40 @@ public class GlobalExceptionHandler {
                 ApiResponseDTO<Object> response = ApiResponseDTO.builder()
                                 .status("error")
                                 .message(ex.getMessage())
+                                .timestamp(Instant.now())
+                                .path(request.getRequestURI())
+                                .data(null)
+                                .build();
+
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
+        // Handle database integrity violations (e.g., duplicate email)
+        @ExceptionHandler(DataIntegrityViolationException.class)
+        public ResponseEntity<ApiResponseDTO<Object>> handleDataIntegrityViolation(
+                        DataIntegrityViolationException ex,
+                        HttpServletRequest request) {
+
+                ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                                .status("error")
+                                .message("Database constraint violation: " + ex.getMostSpecificCause().getMessage())
+                                .timestamp(Instant.now())
+                                .path(request.getRequestURI())
+                                .data(null)
+                                .build();
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        // Handle expired JWT token
+        @ExceptionHandler(ExpiredJwtException.class)
+        public ResponseEntity<ApiResponseDTO<Object>> handleExpiredJwt(
+                        ExpiredJwtException ex,
+                        HttpServletRequest request) {
+
+                ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                                .status("error")
+                                .message("JWT token has expired")
                                 .timestamp(Instant.now())
                                 .path(request.getRequestURI())
                                 .data(null)
