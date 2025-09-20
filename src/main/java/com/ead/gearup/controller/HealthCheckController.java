@@ -12,7 +12,7 @@ import com.ead.gearup.validation.RequiresRole;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
-@RequestMapping("/api/public/v1/health-check")
+@RequestMapping("/api/v1/health-check")
 @SecurityRequirement(name = "bearerAuth")
 public class HealthCheckController {
 

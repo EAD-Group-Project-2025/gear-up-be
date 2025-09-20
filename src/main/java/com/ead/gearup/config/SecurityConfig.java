@@ -1,6 +1,8 @@
 package com.ead.gearup.config;
 
+import com.ead.gearup.dto.response.ApiResponseDTO;
 import com.ead.gearup.filter.JwtAuthenticationFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -31,6 +33,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final ObjectMapper objectMapper;
 
     /**
      * Main Security Filter Chain
@@ -66,7 +69,15 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint((req, res, authEx) -> {
                     res.setContentType("application/json");
                     res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    res.getWriter().write("{\"success\":false,\"message\":\"Unauthorized\"}");
+
+                    ApiResponseDTO<Object> apiResponse = ApiResponseDTO.builder()
+                            .status("error")
+                            .message("Unauthorized")
+                            .path(req.getRequestURI())
+                            .data(null)
+                            .build();
+
+                    res.getWriter().write(objectMapper.writeValueAsString(apiResponse));
                 }))
 
                 // Add JWT filter before UsernamePasswordAuthenticationFilter
