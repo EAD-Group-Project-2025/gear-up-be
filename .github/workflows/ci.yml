@@ -1,0 +1,52 @@
+name: Java CI Pipeline
+
+on:
+  push:
+    branches: [main, dev, feature/authentication]
+  pull_request:
+    branches: [main, dev, feature/authentication]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up JDK 21
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # Cache Maven dependencies
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # Build project (compile + verify dependencies)
+      - name: Build project
+        run: mvn clean install -B -DskipTests
+
+      # Run unit tests
+      - name: Run unit tests
+        run: mvn test -Dtest=*UnitTest
+
+      # Optional: Generate code coverage report for unit tests
+      - name: Generate JaCoCo report
+        run: mvn jacoco:report -Dtest=*UnitTest
+
+      # Check code style with Checkstyle
+    #   - name: Check code style
+    #     run: mvn checkstyle:check
+
+      # Run SpotBugs static analysis
+    #   - name: SpotBugs static analysis
+    #     run: mvn spotbugs:check
