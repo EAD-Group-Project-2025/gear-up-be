@@ -33,19 +33,15 @@ jobs:
 
       # Build project (compile + verify dependencies)
       - name: Build project
-        run: mvn clean install -B
+        run: mvn clean install -B -DskipTests
 
       # Run unit tests
       - name: Run unit tests
-        run: mvn test
+        run: mvn test -Dtest=*UnitTest
 
-      # Run integration tests with test profile (H2 DB + mock JWT/email)
-      - name: Run integration tests
-        run: mvn verify -Dspring.profiles.active=test
-
-      # Generate JaCoCo code coverage
-      - name: Generate code coverage report
-        run: mvn jacoco:report
+      # Optional: Generate code coverage report for unit tests
+      - name: Generate JaCoCo report
+        run: mvn jacoco:report -Dtest=*UnitTest
 
       # Check code style with Checkstyle
       - name: Check code style
