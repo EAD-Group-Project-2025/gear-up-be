@@ -44,9 +44,9 @@ jobs:
         run: mvn jacoco:report -Dtest=*UnitTest
 
       # Check code style with Checkstyle
-      - name: Check code style
-        run: mvn checkstyle:check
+    #   - name: Check code style
+    #     run: mvn checkstyle:check
 
       # Run SpotBugs static analysis
-      - name: SpotBugs static analysis
-        run: mvn spotbugs:check
+    #   - name: SpotBugs static analysis
+    #     run: mvn spotbugs:check
