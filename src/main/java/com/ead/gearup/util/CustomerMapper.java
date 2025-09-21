@@ -1,4 +1,4 @@
-package com.ead.gearup.mappers;
+package com.ead.gearup.util;
 
 import com.ead.gearup.dto.customer.CustomerRequestDTO;
 import com.ead.gearup.dto.customer.CustomerResponseDTO;
@@ -12,10 +12,10 @@ public interface CustomerMapper {
     // Map only profile-related fields
     @Mapping(target = "customerId", ignore = true)
     @Mapping(target = "user", ignore = true) // User will be set manually in the service
-    @Mapping(target = "createdAt", ignore = true)
     Customer toEntity(CustomerRequestDTO dto);
 
     // Convert Customer -> ResponseDTO
-    @Mapping(source = "user.email", target = "email")  // take email from linked User
+    @Mapping(source = "user.email", target = "email")
+    @Mapping(source = "user.name", target = "name")
     CustomerResponseDTO toDto(Customer customer);
 }
