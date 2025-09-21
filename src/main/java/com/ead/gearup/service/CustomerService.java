@@ -2,11 +2,11 @@ package com.ead.gearup.service;
 
 import com.ead.gearup.dto.customer.CustomerRequestDTO;
 import com.ead.gearup.dto.customer.CustomerResponseDTO;
+import com.ead.gearup.exception.CustomerNotFoundException;
+import com.ead.gearup.exception.UnauthorizedCustomerAccessException;
 import com.ead.gearup.model.Customer;
 import com.ead.gearup.model.User;
 import com.ead.gearup.enums.UserRole;
-import com.ead.gearup.exception.CustomerNotFoundException;
-import com.ead.gearup.exception.UnauthorizedCustomerAccessException;
 import com.ead.gearup.repository.CustomerRepository;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.auth.CurrentUserService;
@@ -49,25 +49,26 @@ public class CustomerService {
 
     @Transactional
     public CustomerResponseDTO create(@Valid CustomerRequestDTO dto) {
-        User user = currentUserService.getCurrentUser();
+        User currentUser = currentUserService.getCurrentUser();
 
-        if (user == null) {
+        if (currentUser == null) {
             throw new IllegalStateException("No authenticated user found");
         }
 
-        if (user.getRole() != UserRole.CUSTOMER) {
-            throw new UnauthorizedCustomerAccessException("Only customers can create customer profiles");
+        if (currentUser.getRole() != UserRole.PUBLIC) {
+            throw new UnauthorizedCustomerAccessException(
+                    "Only public users can create a customer profile");
         }
 
-        user.setRole(UserRole.CUSTOMER);
-        userRepository.save(user);
+        currentUser.setRole(UserRole.CUSTOMER);
+        userRepository.save(currentUser);
 
         Customer customer = customerMapper.toEntity(dto);
         if (customer == null) {
             throw new IllegalStateException("Failed to map customer request");
         }
 
-        customer.setUser(user);
+        customer.setUser(currentUser);
 
         return customerMapper.toDto(customerRepository.save(customer));
     }
@@ -82,7 +83,15 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + id));
 
-        customer.setPhoneNumber(dto.getPhoneNumber());
+        if (dto.getName() != null) {
+            User currentUser = currentUserService.getCurrentUser();
+            currentUser.setName(dto.getName());
+            userRepository.save(currentUser);
+        }
+
+        if (dto.getPhoneNumber() != null) {
+            customer.setPhoneNumber(dto.getPhoneNumber());
+        }
 
         return customerMapper.toDto(customerRepository.save(customer));
     }
