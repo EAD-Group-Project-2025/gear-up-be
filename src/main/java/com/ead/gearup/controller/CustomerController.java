@@ -4,7 +4,10 @@ import com.ead.gearup.dto.customer.CustomerRequestDTO;
 import com.ead.gearup.dto.customer.CustomerResponseDTO;
 import com.ead.gearup.dto.customer.CustomerUpdateDTO;
 import com.ead.gearup.dto.response.ApiResponseDTO;
+import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.service.CustomerService;
+import com.ead.gearup.validation.RequiresRole;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +32,7 @@ public class CustomerController {
 
     @GetMapping
     @Operation(summary = "Get all customers")
+    @RequiresRole({ UserRole.CUSTOMER, UserRole.ADMIN, UserRole.EMPLOYEE })
     public ResponseEntity<ApiResponseDTO<List<CustomerResponseDTO>>> getAll(HttpServletRequest request) {
         List<CustomerResponseDTO> customers = customerService.getAll();
 
@@ -45,6 +49,7 @@ public class CustomerController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get customer by ID")
+    @RequiresRole({ UserRole.CUSTOMER, UserRole.ADMIN, UserRole.EMPLOYEE })
     public ResponseEntity<ApiResponseDTO<CustomerResponseDTO>> getById(@PathVariable Long id,
             HttpServletRequest request) {
         CustomerResponseDTO customer = customerService.getById(id);
@@ -81,6 +86,7 @@ public class CustomerController {
 
     @PatchMapping("/{id}")
     @Operation(summary = "Update customer by ID")
+    @RequiresRole({ UserRole.CUSTOMER })
     public ResponseEntity<ApiResponseDTO<CustomerResponseDTO>> update(
             @PathVariable Long id,
             @Valid @RequestBody CustomerUpdateDTO dto,
@@ -101,6 +107,7 @@ public class CustomerController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete customer by ID")
+    @RequiresRole({ UserRole.CUSTOMER })
     public ResponseEntity<ApiResponseDTO<Object>> delete(@PathVariable Long id, HttpServletRequest request) {
         customerService.delete(id);
 

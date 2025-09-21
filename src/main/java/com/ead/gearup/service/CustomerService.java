@@ -12,7 +12,6 @@ import com.ead.gearup.repository.CustomerRepository;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.auth.CurrentUserService;
 import com.ead.gearup.util.CustomerMapper;
-import com.ead.gearup.validation.RequiresRole;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +74,6 @@ public class CustomerService {
     }
 
     @Transactional
-    @RequiresRole({ UserRole.CUSTOMER })
     public CustomerResponseDTO update(Long id, @Valid CustomerUpdateDTO dto) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Invalid customer ID");
@@ -98,7 +96,6 @@ public class CustomerService {
     }
 
     @Transactional
-    @RequiresRole({ UserRole.CUSTOMER })
     public void delete(Long id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Invalid customer ID");
@@ -106,6 +103,14 @@ public class CustomerService {
 
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + id));
+
+        // Handle linked User
+        User linkedUser = customer.getUser();
+        if (linkedUser != null) {
+            linkedUser.setRole(UserRole.PUBLIC);
+            customer.setUser(null);
+            userRepository.save(linkedUser);
+        }
 
         customerRepository.delete(customer);
     }
