@@ -2,9 +2,9 @@ name: Java CI Pipeline
 
 on:
   push:
-    branches: [main, dev, feature/authentication]
+    branches: [main, dev]
   pull_request:
-    branches: [main, dev, feature/authentication]
+    branches: [main, dev]
 
 jobs:
   build:
@@ -47,6 +47,6 @@ jobs:
     #   - name: Check code style
     #     run: mvn checkstyle:check
 
-      # Run SpotBugs static analysis
+    # Run SpotBugs static analysis
     #   - name: SpotBugs static analysis
     #     run: mvn spotbugs:check
