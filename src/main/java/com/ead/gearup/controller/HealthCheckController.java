@@ -21,7 +21,7 @@ public class HealthCheckController {
     @GetMapping
     @RequiresRole({ UserRole.CUSTOMER })
     public ResponseEntity<String> healthCheck() {
-        String message = "voluntrix-backend is running successfully";
+        String message = "gearup-backend is running successfully";
         return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 }
