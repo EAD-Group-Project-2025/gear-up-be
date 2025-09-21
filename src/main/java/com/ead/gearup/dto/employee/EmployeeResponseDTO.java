@@ -14,7 +14,6 @@ public class EmployeeResponseDTO {
     private Long employeeId;
     private String name;
     private String email;
-    //private String role;
     private String specialization;
     private LocalDate hireDate;
     private LocalDateTime createdAt;

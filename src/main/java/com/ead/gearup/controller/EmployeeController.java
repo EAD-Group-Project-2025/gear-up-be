@@ -3,70 +3,118 @@ package com.ead.gearup.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.ead.gearup.dto.employee.CreateEmployeeDTO;
 import com.ead.gearup.dto.employee.EmployeeResponseDTO;
 import com.ead.gearup.dto.employee.UpdateEmployeeDTO;
+import com.ead.gearup.dto.response.ApiResponseDTO;
 import com.ead.gearup.service.EmployeeService;
-import com.ead.gearup.validation.RequiresRole;
-import com.ead.gearup.enums.UserRole;
 
-import org.springframework.web.bind.annotation.RequestBody; 
-
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
+import java.time.Instant;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/employees")
+@SecurityRequirement(name = "bearerAuth")
 public class EmployeeController {
-    
+
     @Autowired
     private EmployeeService employeeService;
 
-    //@RequiresRole({UserRole.ADMIN, UserRole.EMPLOYEE, UserRole.PUBLIC})
+    // @RequiresRole({UserRole.ADMIN, UserRole.EMPLOYEE, UserRole.PUBLIC})
     @PostMapping
-    public ResponseEntity<EmployeeResponseDTO> createEmployee(@Valid @RequestBody CreateEmployeeDTO createEmployeeDTO) {
+    public ResponseEntity<ApiResponseDTO<EmployeeResponseDTO>> createEmployee(
+            @Valid @RequestBody CreateEmployeeDTO createEmployeeDTO, HttpServletRequest request) {
+
         EmployeeResponseDTO createdEmployee = employeeService.createEmployee(createEmployeeDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdEmployee);
+
+        ApiResponseDTO<EmployeeResponseDTO> response = ApiResponseDTO.<EmployeeResponseDTO>builder()
+                .status("success")
+                .message("Employee created successfully")
+                .data(createdEmployee)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    //@RequiresRole({UserRole.ADMIN, UserRole.EMPLOYEE, UserRole.CUSTOMER, UserRole.PUBLIC})
+    // @RequiresRole({UserRole.ADMIN, UserRole.EMPLOYEE, UserRole.CUSTOMER,
+    // UserRole.PUBLIC})
     @GetMapping
-    public ResponseEntity<List<EmployeeResponseDTO>> getAllEmployees() {
+    public ResponseEntity<ApiResponseDTO<List<EmployeeResponseDTO>>> getAllEmployees(HttpServletRequest request) {
+
         List<EmployeeResponseDTO> employees = employeeService.getAllEmployees();
-        return ResponseEntity.ok(employees);
+
+        ApiResponseDTO<List<EmployeeResponseDTO>> response = ApiResponseDTO.<List<EmployeeResponseDTO>>builder()
+                .status("success")
+                .message("Employees retrieved successfully")
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(employees)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
-    //@RequiresRole({UserRole.ADMIN, UserRole.EMPLOYEE, UserRole.CUSTOMER, UserRole.PUBLIC})
+    // @RequiresRole({UserRole.ADMIN, UserRole.EMPLOYEE, UserRole.CUSTOMER,
+    // UserRole.PUBLIC})
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeResponseDTO> getEmployeeById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponseDTO<EmployeeResponseDTO>> getEmployeeById(@PathVariable Long id,
+            HttpServletRequest request) {
+
         EmployeeResponseDTO employee = employeeService.getEmployeeById(id);
-        return ResponseEntity.ok(employee);
+
+        ApiResponseDTO<EmployeeResponseDTO> response = ApiResponseDTO.<EmployeeResponseDTO>builder()
+                .status("success")
+                .message("Employee retrieved successfully")
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(employee)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
-    //@RequiresRole({UserRole.ADMIN, UserRole.EMPLOYEE, UserRole.PUBLIC})
+    // @RequiresRole({UserRole.ADMIN, UserRole.EMPLOYEE, UserRole.PUBLIC})
     @PatchMapping("/{id}")
-    public ResponseEntity<EmployeeResponseDTO> updateEmployee(
-            @PathVariable Long id, 
-            @Valid @RequestBody UpdateEmployeeDTO updateEmployeeDTO) {
+    public ResponseEntity<ApiResponseDTO<EmployeeResponseDTO>> updateEmployee(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateEmployeeDTO updateEmployeeDTO,
+            HttpServletRequest request) {
+
         EmployeeResponseDTO updatedEmployee = employeeService.updateEmployee(id, updateEmployeeDTO);
-        return ResponseEntity.ok(updatedEmployee);
+
+        ApiResponseDTO<EmployeeResponseDTO> response = ApiResponseDTO.<EmployeeResponseDTO>builder()
+                .status("success")
+                .message("Employee updated successfully")
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(updatedEmployee)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
-    
-    //@RequiresRole({UserRole.ADMIN, UserRole.EMPLOYEE, UserRole.PUBLIC})
+    // @RequiresRole({UserRole.ADMIN, UserRole.EMPLOYEE, UserRole.PUBLIC})
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+    public ResponseEntity<ApiResponseDTO<Void>> deleteEmployee(@PathVariable Long id, HttpServletRequest request) {
+
         employeeService.deleteEmployee(id);
-        return ResponseEntity.noContent().build();
+
+        ApiResponseDTO<Void> response = ApiResponseDTO.<Void>builder()
+                .status("success")
+                .message("Employee deleted successfully")
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(null)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
-
-
 }

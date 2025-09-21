@@ -1,7 +1,5 @@
 package com.ead.gearup.utils;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.ead.gearup.dto.employee.CreateEmployeeDTO;
@@ -9,25 +7,14 @@ import com.ead.gearup.dto.employee.EmployeeResponseDTO;
 import com.ead.gearup.dto.employee.UpdateEmployeeDTO;
 import com.ead.gearup.model.Employee;
 import com.ead.gearup.model.User;
-import com.ead.gearup.enums.UserRole;
 
 @Component
 public class EmployeeDTOConverter {
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     // Convert CreateEmployeeDTO to Employee entity
     public Employee convertToEntity(CreateEmployeeDTO dto) {
         Employee employee = new Employee();
 
-        User user = new User();
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRole(UserRole.EMPLOYEE); 
-
-        employee.setUser(user);
         employee.setSpecialization(dto.getSpecialization());
         employee.setHireDate(dto.getHireDate());
 
@@ -55,12 +42,6 @@ public class EmployeeDTOConverter {
 
         if (dto.getName() != null) {
             user.setName(dto.getName());
-        }
-        if (dto.getEmail() != null) {
-            user.setEmail(dto.getEmail());
-        }
-        if (dto.getPassword() != null) {
-            user.setPassword(passwordEncoder.encode(dto.getPassword())); 
         }
 
         if (dto.getSpecialization() != null) {
