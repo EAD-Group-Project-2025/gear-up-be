@@ -4,9 +4,11 @@ import com.ead.gearup.dto.customer.CustomerRequestDTO;
 import com.ead.gearup.dto.customer.CustomerResponseDTO;
 import com.ead.gearup.mappers.CustomerMapper;
 import com.ead.gearup.model.Customer;
+import com.ead.gearup.model.User;
+import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.repository.CustomerRepository;
+import com.ead.gearup.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,8 +20,8 @@ import java.util.stream.Collectors;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final UserRepository userRepository; // to link existing User
     private final CustomerMapper customerMapper;
-    private final PasswordEncoder passwordEncoder;
 
     public List<CustomerResponseDTO> getAll() {
         return customerRepository.findAll().stream()
@@ -33,10 +35,19 @@ public class CustomerService {
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
     }
 
-    public CustomerResponseDTO create(CustomerRequestDTO dto) {
+    public CustomerResponseDTO create(Long userId, CustomerRequestDTO dto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getRole() != UserRole.CUSTOMER) {
+            user.setRole(UserRole.CUSTOMER);
+            userRepository.save(user);
+        }
+
         Customer customer = customerMapper.toEntity(dto);
-        customer.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        customer.setUser(user);
         customer.setCreatedAt(LocalDateTime.now());
+
         return customerMapper.toDto(customerRepository.save(customer));
     }
 
@@ -44,8 +55,6 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        customer.setEmail(dto.getEmail());
-        customer.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         customer.setFirstName(dto.getFirstName());
         customer.setLastName(dto.getLastName());
         customer.setPhoneNumber(dto.getPhoneNumber());
@@ -57,4 +66,3 @@ public class CustomerService {
         customerRepository.deleteById(id);
     }
 }
-

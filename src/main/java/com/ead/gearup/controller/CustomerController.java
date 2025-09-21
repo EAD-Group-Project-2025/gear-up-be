@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.List;
 
 @RestController
@@ -31,15 +30,21 @@ public class CustomerController {
         return customerService.getById(id);
     }
 
-    @PostMapping
-    @Operation(summary = "Create new customer")
-    public CustomerResponseDTO create(@RequestBody CustomerRequestDTO dto) {
-        return customerService.create(dto);
+    @PostMapping("/{userId}")
+    @Operation(summary = "Create new customer linked to an existing user")
+    public CustomerResponseDTO create(
+            @PathVariable Long userId,
+            @RequestBody CustomerRequestDTO dto
+    ) {
+        return customerService.create(userId, dto);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update customer by ID")
-    public CustomerResponseDTO update(@PathVariable Long id, @RequestBody CustomerRequestDTO dto) {
+    public CustomerResponseDTO update(
+            @PathVariable Long id,
+            @RequestBody CustomerRequestDTO dto
+    ) {
         return customerService.update(id, dto);
     }
 
@@ -49,4 +54,3 @@ public class CustomerController {
         customerService.delete(id);
     }
 }
-

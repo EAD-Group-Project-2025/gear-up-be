@@ -9,8 +9,13 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface CustomerMapper {
 
-    @Mapping(target = "passwordHash", source = "password")
+    // Map only profile-related fields
+    @Mapping(target = "customerId", ignore = true)
+    @Mapping(target = "user", ignore = true) // User will be set manually in the service
+    @Mapping(target = "createdAt", ignore = true)
     Customer toEntity(CustomerRequestDTO dto);
 
+    // Convert Customer -> ResponseDTO
+    @Mapping(source = "user.email", target = "email")  // take email from linked User
     CustomerResponseDTO toDto(Customer customer);
 }

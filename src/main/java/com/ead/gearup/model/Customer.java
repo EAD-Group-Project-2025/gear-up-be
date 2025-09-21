@@ -16,11 +16,10 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long customerId;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+    @ManyToOne
+    @JoinColumn(name = "user_id") // must match User's @Column name
+    private User user;
 
-    @Column(nullable = false)
-    private String passwordHash;
 
     @Column(nullable = false)
     private String firstName;
