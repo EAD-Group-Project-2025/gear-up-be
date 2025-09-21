@@ -2,6 +2,7 @@ package com.ead.gearup.controller;
 
 import com.ead.gearup.dto.customer.CustomerRequestDTO;
 import com.ead.gearup.dto.customer.CustomerResponseDTO;
+import com.ead.gearup.dto.customer.CustomerUpdateDTO;
 import com.ead.gearup.dto.response.ApiResponseDTO;
 import com.ead.gearup.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -82,7 +83,7 @@ public class CustomerController {
     @Operation(summary = "Update customer by ID")
     public ResponseEntity<ApiResponseDTO<CustomerResponseDTO>> update(
             @PathVariable Long id,
-            @Valid @RequestBody CustomerRequestDTO dto,
+            @Valid @RequestBody CustomerUpdateDTO dto,
             HttpServletRequest request) {
 
         CustomerResponseDTO updatedCustomer = customerService.update(id, dto);

@@ -2,6 +2,7 @@ package com.ead.gearup.service;
 
 import com.ead.gearup.dto.customer.CustomerRequestDTO;
 import com.ead.gearup.dto.customer.CustomerResponseDTO;
+import com.ead.gearup.dto.customer.CustomerUpdateDTO;
 import com.ead.gearup.exception.CustomerNotFoundException;
 import com.ead.gearup.exception.UnauthorizedCustomerAccessException;
 import com.ead.gearup.model.Customer;
@@ -48,7 +49,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public CustomerResponseDTO create(@Valid CustomerRequestDTO dto) {
+    public CustomerResponseDTO create(CustomerRequestDTO dto) {
         User currentUser = currentUserService.getCurrentUser();
 
         if (currentUser == null) {
@@ -75,7 +76,7 @@ public class CustomerService {
 
     @Transactional
     @RequiresRole({ UserRole.CUSTOMER })
-    public CustomerResponseDTO update(Long id, @Valid CustomerRequestDTO dto) {
+    public CustomerResponseDTO update(Long id, @Valid CustomerUpdateDTO dto) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Invalid customer ID");
         }
