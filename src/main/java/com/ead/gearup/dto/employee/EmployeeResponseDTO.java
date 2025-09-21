@@ -12,10 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EmployeeResponseDTO {
     private Long employeeId;
-    private String firstName;
-    private String lastName;
+    private String name;
     private String email;
-    private String role;
+    //private String role;
     private String specialization;
     private LocalDate hireDate;
     private LocalDateTime createdAt;
