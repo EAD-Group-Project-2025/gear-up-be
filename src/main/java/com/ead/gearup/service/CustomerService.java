@@ -2,14 +2,16 @@ package com.ead.gearup.service;
 
 import com.ead.gearup.dto.customer.CustomerRequestDTO;
 import com.ead.gearup.dto.customer.CustomerResponseDTO;
-import com.ead.gearup.mappers.CustomerMapper;
 import com.ead.gearup.model.Customer;
 import com.ead.gearup.model.User;
 import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.exception.CustomerNotFoundException;
+import com.ead.gearup.exception.UnauthorizedCustomerAccessException;
 import com.ead.gearup.repository.CustomerRepository;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.auth.CurrentUserService;
+import com.ead.gearup.util.CustomerMapper;
+import com.ead.gearup.validation.RequiresRole;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -54,9 +56,11 @@ public class CustomerService {
         }
 
         if (user.getRole() != UserRole.CUSTOMER) {
-            user.setRole(UserRole.CUSTOMER);
-            userRepository.save(user);/////////
+            throw new UnauthorizedCustomerAccessException("Only customers can create customer profiles");
         }
+
+        user.setRole(UserRole.CUSTOMER);
+        userRepository.save(user);
 
         Customer customer = customerMapper.toEntity(dto);
         if (customer == null) {
@@ -69,6 +73,7 @@ public class CustomerService {
     }
 
     @Transactional
+    @RequiresRole({ UserRole.CUSTOMER })
     public CustomerResponseDTO update(Long id, @Valid CustomerRequestDTO dto) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Invalid customer ID");
@@ -77,17 +82,13 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + id));
 
-        Long currentUserId = currentUserService.getCurrentUserId();
-        if (!customer.getUser().getUserId().equals(currentUserId)) {
-            throw new SecurityException("unauthorized");
-        }
-
         customer.setPhoneNumber(dto.getPhoneNumber());
 
         return customerMapper.toDto(customerRepository.save(customer));
     }
 
     @Transactional
+    @RequiresRole({ UserRole.CUSTOMER })
     public void delete(Long id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Invalid customer ID");
@@ -95,11 +96,6 @@ public class CustomerService {
 
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + id));
-
-        long currentUserId = currentUserService.getCurrentUserId();
-        if (!customer.getUser().getUserId().equals(currentUserId)) {
-            throw new SecurityException("You are not authorized to delete this customer");
-        }
 
         customerRepository.delete(customer);
     }
