@@ -1,6 +1,6 @@
 # Multi-stage build for Spring Boot application
 # Stage 1: Build the application
-FROM maven:3.8.5-openjdk-17 AS builder
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 WORKDIR /app
 
 # Copy pom.xml first to leverage Docker layer caching
@@ -12,8 +12,11 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Create the runtime image
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
+
+# Install curl for health checks
+RUN apk add --no-cache curl
 
 # Create a non-root user for security
 RUN addgroup --system spring && adduser --system spring --ingroup spring
