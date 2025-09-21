@@ -15,6 +15,7 @@ public interface CustomerMapper {
     Customer toEntity(CustomerRequestDTO dto);
 
     // Convert Customer -> ResponseDTO
+    @Mapping(source = "customerId", target = "id")
     @Mapping(source = "user.email", target = "email")
     @Mapping(source = "user.name", target = "name")
     CustomerResponseDTO toDto(Customer customer);
