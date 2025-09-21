@@ -2,9 +2,9 @@ name: Java CI Pipeline
 
 on:
   push:
-    branches: [ main, dev, feature/authentication ]
+    branches: [main, dev, feature/authentication]
   pull_request:
-    branches: [ main, dev, feature/authentication ]
+    branches: [main, dev, feature/authentication]
 
 jobs:
   build:
@@ -15,11 +15,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up JDK 17
+      # Set up JDK 21
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
 
       # Cache Maven dependencies
