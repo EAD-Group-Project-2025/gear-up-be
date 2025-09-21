@@ -10,10 +10,12 @@ import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.validation.RequiresRole;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/v1/health-check")
 @SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Health Check API", description = "Endpoints to verify the availability and status of the application")
 public class HealthCheckController {
 
     @GetMapping
