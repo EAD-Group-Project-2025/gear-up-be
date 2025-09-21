@@ -128,10 +128,44 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    // Handle customer not found exception
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<ApiResponseDTO<Object>> handleCustomerNotFound(
+            CustomerNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                .status("error")
+                .message(ex.getMessage())
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(null)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+    
     // Handle email not varified exception
     @ExceptionHandler(EmailNotVerifiedException.class)
     public ResponseEntity<ApiResponseDTO<Object>> handleEmailNotVerified(
             EmailNotVerifiedException ex,
+            HttpServletRequest request) {
+
+        ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                .status("error")
+                .message(ex.getMessage())
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(null)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    // Handle unauthorized customer access exception
+    @ExceptionHandler(UnauthorizedCustomerAccessException.class)
+    public ResponseEntity<ApiResponseDTO<Object>> handleUnauthorizedCustomerAccess(
+            UnauthorizedCustomerAccessException ex,
             HttpServletRequest request) {
 
         ApiResponseDTO<Object> response = ApiResponseDTO.builder()

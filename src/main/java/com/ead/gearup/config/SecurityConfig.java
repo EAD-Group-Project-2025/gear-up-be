@@ -54,18 +54,17 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/api/auth/**",
-                                "/api/public/**",
-                                "/success.html",
-                                "/error.html")
+                                "/api/public/**")
                         .permitAll()
-                        .requestMatchers("/auth/user/**").hasRole("USER")
-                        .requestMatchers("/auth/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // .requestMatchers("/api/customers/**").hasRole("CUSTOMER")
+                        .requestMatchers("/api/employees/**").hasRole("EMPLOYEES")
                         .anyRequest().authenticated())
 
                 // Stateless session
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Custom exception handling for APIs
+                // Handle unauthenticated (401) and unauthorized (403) responses
                 .exceptionHandling(ex -> ex.authenticationEntryPoint((req, res, authEx) -> {
                     res.setContentType("application/json");
                     res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -73,6 +72,21 @@ public class SecurityConfig {
                     ApiResponseDTO<Object> apiResponse = ApiResponseDTO.builder()
                             .status("error")
                             .message("Unauthorized")
+                            .path(req.getRequestURI())
+                            .data(null)
+                            .build();
+
+                    res.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+                })
+                
+                // 403 - Authenticated but insufficient role
+                .accessDeniedHandler((req, res, accessDeniedEx) -> {
+                    res.setContentType("application/json");
+                    res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+
+                    ApiResponseDTO<Object> apiResponse = ApiResponseDTO.builder()
+                            .status("error")
+                            .message("Forbidden: Access denied")
                             .path(req.getRequestURI())
                             .data(null)
                             .build();
