@@ -11,19 +11,21 @@ import com.ead.gearup.repository.CustomerRepository;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.auth.CurrentUserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final UserRepository userRepository; // to link existing User
+    private final UserRepository userRepository;
     private final CustomerMapper customerMapper;
     private final CurrentUserService currentUserService;
 
@@ -34,42 +36,71 @@ public class CustomerService {
     }
 
     public CustomerResponseDTO getById(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Invalid customer ID");
+        }
+
         return customerRepository.findById(id)
                 .map(customerMapper::toDto)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + id));
     }
 
-    public CustomerResponseDTO create(CustomerRequestDTO dto) {
-
+    @Transactional
+    public CustomerResponseDTO create(@Valid CustomerRequestDTO dto) {
         User user = currentUserService.getCurrentUser();
+
+        if (user == null) {
+            throw new IllegalStateException("No authenticated user found");
+        }
 
         if (user.getRole() != UserRole.CUSTOMER) {
             user.setRole(UserRole.CUSTOMER);
-            userRepository.save(user);
+            userRepository.save(user);/////////
         }
 
         Customer customer = customerMapper.toEntity(dto);
+        if (customer == null) {
+            throw new IllegalStateException("Failed to map customer request");
+        }
+
         customer.setUser(user);
-        customer.setCreatedAt(LocalDateTime.now());
 
         return customerMapper.toDto(customerRepository.save(customer));
     }
 
-    public CustomerResponseDTO update(Long id, CustomerRequestDTO dto) {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+    @Transactional
+    public CustomerResponseDTO update(Long id, @Valid CustomerRequestDTO dto) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Invalid customer ID");
+        }
 
-        customer.setFirstName(dto.getFirstName());
-        customer.setLastName(dto.getLastName());
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + id));
+
+        Long currentUserId = currentUserService.getCurrentUserId();
+        if (!customer.getUser().getUserId().equals(currentUserId)) {
+            throw new SecurityException("unauthorized");
+        }
+
         customer.setPhoneNumber(dto.getPhoneNumber());
 
         return customerMapper.toDto(customerRepository.save(customer));
     }
 
+    @Transactional
     public void delete(Long id) {
-        customerRepository.findById(id)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Invalid customer ID");
+        }
 
-        customerRepository.deleteById(id);
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + id));
+
+        long currentUserId = currentUserService.getCurrentUserId();
+        if (!customer.getUser().getUserId().equals(currentUserId)) {
+            throw new SecurityException("You are not authorized to delete this customer");
+        }
+
+        customerRepository.delete(customer);
     }
 }
