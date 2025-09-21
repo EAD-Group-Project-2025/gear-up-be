@@ -39,14 +39,18 @@ jobs:
       - name: Run unit tests
         run: mvn test
 
-      # Run JaCoCo code coverage
+      # Run integration tests with test profile (H2 DB + mock JWT/email)
+      - name: Run integration tests
+        run: mvn verify -Dspring.profiles.active=test
+
+      # Generate JaCoCo code coverage
       - name: Generate code coverage report
         run: mvn jacoco:report
 
-      # Run Checkstyle for code quality
+      # Check code style with Checkstyle
       - name: Check code style
         run: mvn checkstyle:check
 
-      # Run SpotBugs for potential bugs
+      # Run SpotBugs static analysis
       - name: SpotBugs static analysis
         run: mvn spotbugs:check
