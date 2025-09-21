@@ -6,8 +6,11 @@ import com.ead.gearup.mappers.CustomerMapper;
 import com.ead.gearup.model.Customer;
 import com.ead.gearup.model.User;
 import com.ead.gearup.enums.UserRole;
+import com.ead.gearup.exception.CustomerNotFoundException;
 import com.ead.gearup.repository.CustomerRepository;
 import com.ead.gearup.repository.UserRepository;
+import com.ead.gearup.service.auth.CurrentUserService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +25,7 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository; // to link existing User
     private final CustomerMapper customerMapper;
+    private final CurrentUserService currentUserService;
 
     public List<CustomerResponseDTO> getAll() {
         return customerRepository.findAll().stream()
@@ -32,12 +36,12 @@ public class CustomerService {
     public CustomerResponseDTO getById(Long id) {
         return customerRepository.findById(id)
                 .map(customerMapper::toDto)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
     }
 
-    public CustomerResponseDTO create(Long userId, CustomerRequestDTO dto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public CustomerResponseDTO create(CustomerRequestDTO dto) {
+
+        User user = currentUserService.getCurrentUser();
 
         if (user.getRole() != UserRole.CUSTOMER) {
             user.setRole(UserRole.CUSTOMER);
@@ -53,7 +57,7 @@ public class CustomerService {
 
     public CustomerResponseDTO update(Long id, CustomerRequestDTO dto) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
 
         customer.setFirstName(dto.getFirstName());
         customer.setLastName(dto.getLastName());
@@ -63,6 +67,9 @@ public class CustomerService {
     }
 
     public void delete(Long id) {
+        customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+
         customerRepository.deleteById(id);
     }
 }
