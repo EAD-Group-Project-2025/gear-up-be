@@ -45,13 +45,9 @@ public class VehicleDTOConverter {
     public void updateEntityFromDto(Vehicle vehicle, VehicleUpdateDTO dto) {
 
         if (dto.getLicensePlate() != null) {
-
-            // Check if vehicle already exists by license plate
-            vehicleRepository.findByLicensePlate(dto.getLicensePlate())
-                    .ifPresent(v -> {
-                        throw new IllegalArgumentException("Vehicle with this license plate already exists");
-                    });
-
+            if (vehicleRepository.existsByLicensePlateAndVehicleIdNot(dto.getLicensePlate(), vehicle.getVehicleId())) {
+                throw new IllegalArgumentException("Vehicle with this license plate already exists");
+            }
             vehicle.setLicensePlate(dto.getLicensePlate());
         }
 
@@ -64,13 +60,9 @@ public class VehicleDTOConverter {
         }
 
         if (dto.getVin() != null) {
-
-            // Check if vehicle already exists by vin
-            vehicleRepository.findByVin(dto.getVin())
-                    .ifPresent(v -> {
-                        throw new IllegalArgumentException("Vehicle with this VIN already exists");
-                    });
-
+            if (vehicleRepository.existsByVinAndVehicleIdNot(dto.getVin(), vehicle.getVehicleId())) {
+                throw new IllegalArgumentException("Vehicle with this VIN already exists");
+            }
             vehicle.setVin(dto.getVin());
         }
 
