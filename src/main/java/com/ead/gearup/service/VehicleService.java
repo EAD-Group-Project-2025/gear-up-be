@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.ead.gearup.dto.vehicle.VehicleCreateDTO;
 import com.ead.gearup.dto.vehicle.VehicleResponseDTO;
+import com.ead.gearup.dto.vehicle.VehicleUpdateDTO;
 import com.ead.gearup.exception.CustomerNotFoundException;
 import com.ead.gearup.exception.UserNotFoundException;
 import com.ead.gearup.model.Customer;
@@ -74,7 +75,7 @@ public class VehicleService {
     }
 
     @Transactional
-    public boolean deleteVehicle(Long id) {
+    public void deleteVehicle(Long id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Invalid vehicle ID");
         }
@@ -84,6 +85,20 @@ public class VehicleService {
         }
 
         vehicleRepository.deleteById(id);
-        return true;
+    }
+
+    public VehicleResponseDTO updateVehicle(Long id, VehicleUpdateDTO updateVehicleDTO) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Invalid Vehicle ID");
+        }
+
+        Vehicle existingVehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Vehicle not found with id: " + id));
+
+        converter.updateEntityFromDto(existingVehicle, updateVehicleDTO);
+
+        Vehicle savedVehicle = vehicleRepository.save(existingVehicle);
+
+        return converter.convertToResponseDto(savedVehicle);
     }
 }
