@@ -15,7 +15,7 @@ import com.ead.gearup.model.User;
 import com.ead.gearup.repository.EmployeeRepository;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.auth.CurrentUserService;
-import com.ead.gearup.utils.EmployeeDTOConverter;
+import com.ead.gearup.util.EmployeeDTOConverter;
 
 import lombok.RequiredArgsConstructor;
 

@@ -8,6 +8,8 @@ import com.ead.gearup.exception.AccessDeniedException;
 import com.ead.gearup.exception.UserNotFoundException;
 import com.ead.gearup.model.User;
 import com.ead.gearup.model.UserPrinciple;
+import com.ead.gearup.repository.CustomerRepository;
+import com.ead.gearup.repository.EmployeeRepository;
 import com.ead.gearup.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 public class CurrentUserService {
 
     private final UserRepository userRepository;
+    private final CustomerRepository customerRepository;
+    private final EmployeeRepository employeeRepository;
 
     public Long getCurrentUserId() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -46,24 +50,38 @@ public class CurrentUserService {
      * The entity ID (volunteerId, sponsorId, organizationId, or userId for admin),
      * or null if not found
      */
-    // public Long getCurrentEntityId() {
-    // Long userId = getCurrentUserId();
-    // User user = userRepository.findById(userId)
-    // .orElseThrow(() -> new UserNotFoundException("User not found"));
+    public Long getCurrentEntityId() {
+        Long userId = getCurrentUserId();
 
-    // if (user.getRole() == null) {
-    // return null;
-    // }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-    // return switch (user.getRole()) {
-    // case CUSTOMER -> volunteerRepository.findByUser(user)
-    // .map(volunteer -> volunteer.getVolunteerId())
-    // .orElse(null);
-    // case EMPLOYEE -> sponsorRepository.findByUser(user)
-    // .map(sponsor -> sponsor.getSponsorId())
-    // .orElse(null);
-    // case ADMIN -> user.getUserId();
-    // case PUBLIC -> null;
-    // };
-    // }
+        if (user.getRole() == null) {
+            return null;
+        }
+
+        return switch (user.getRole()) {
+            case CUSTOMER -> customerRepository.findByUser(user)
+                    .map(custromer -> custromer.getCustomerId())
+                    .orElse(null);
+            case EMPLOYEE -> employeeRepository.findByUser(user)
+                    .map(employee -> employee.getEmployeeId())
+                    .orElse(null);
+            case ADMIN -> user.getUserId();
+            case PUBLIC -> user.getUserId();
+        };
+    }
+
+    public UserRole getCurrentUserType() {
+        Long userId = getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+
+        if (user.getRole() == null) {
+            throw new RuntimeException("User role is not set");
+        }
+
+        return user.getRole();
+    }
+
 }

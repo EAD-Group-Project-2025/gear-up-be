@@ -1,4 +1,4 @@
-package com.ead.gearup.utils;
+package com.ead.gearup.util;
 
 import org.springframework.stereotype.Component;
 

@@ -12,6 +12,7 @@ public interface CustomerMapper {
     // Map only profile-related fields
     @Mapping(target = "customerId", ignore = true)
     @Mapping(target = "user", ignore = true) // User will be set manually in the service
+    @Mapping(target = "vehicles", ignore = true)
     Customer toEntity(CustomerRequestDTO dto);
 
     // Convert Customer -> ResponseDTO
