@@ -7,7 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class GearupApplication {
 
 	public static void main(String[] args) {
+
 		SpringApplication.run(GearupApplication.class, args);
+
 	}
 
 }
