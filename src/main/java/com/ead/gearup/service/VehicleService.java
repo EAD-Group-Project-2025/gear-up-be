@@ -1,10 +1,14 @@
 package com.ead.gearup.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 import com.ead.gearup.dto.vehicle.VehicleCreateDTO;
 import com.ead.gearup.dto.vehicle.VehicleResponseDTO;
 import com.ead.gearup.exception.CustomerNotFoundException;
+import com.ead.gearup.exception.UserNotFoundException;
 import com.ead.gearup.model.Customer;
 import com.ead.gearup.model.Vehicle;
 import com.ead.gearup.repository.CustomerRepository;
@@ -51,4 +55,35 @@ public class VehicleService {
         return converter.convertToResponseDto(savedVehicle);
     }
 
+    public VehicleResponseDTO getVehicalById(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Invalid employee ID");
+        }
+
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Vehicle not found with id: " + id));
+
+        return converter.convertToResponseDto(vehicle);
+    }
+
+    public List<VehicleResponseDTO> getAllVehicles() {
+        List<Vehicle> vehicels = vehicleRepository.findAll();
+        return vehicels.stream()
+                .map(vehicle -> converter.convertToResponseDto(vehicle))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public boolean deleteVehicle(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Invalid vehicle ID");
+        }
+
+        if (!vehicleRepository.existsById(id)) {
+            throw new UserNotFoundException("Vehicle not found with id: " + id);
+        }
+
+        vehicleRepository.deleteById(id);
+        return true;
+    }
 }

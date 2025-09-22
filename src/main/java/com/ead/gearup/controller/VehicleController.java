@@ -1,10 +1,14 @@
 package com.ead.gearup.controller;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,5 +50,54 @@ public class VehicleController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponseDTO<VehicleResponseDTO>> getVehicleById(@PathVariable Long id,
+            HttpServletRequest request) {
+
+        VehicleResponseDTO vehicle = vehicleService.getVehicalById(id);
+
+        ApiResponseDTO<VehicleResponseDTO> response = ApiResponseDTO.<VehicleResponseDTO>builder()
+                .status("success")
+                .message("Vehicle retrieved successfully")
+                .data(vehicle)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponseDTO<List<VehicleResponseDTO>>> getAllVehicles(HttpServletRequest request) {
+
+        List<VehicleResponseDTO> vehicles = vehicleService.getAllVehicles();
+
+        ApiResponseDTO<List<VehicleResponseDTO>> response = ApiResponseDTO.<List<VehicleResponseDTO>>builder()
+                .status("success")
+                .message("Vehicles retrieved successfully")
+                .data(vehicles)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponseDTO<Void>> deleteVehicle(@PathVariable Long id, HttpServletRequest request) {
+
+        vehicleService.deleteVehicle(id);
+
+        ApiResponseDTO<Void> response = ApiResponseDTO.<Void>builder()
+                .status("success")
+                .message("Vehicle deleted successfully")
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(null)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 }
