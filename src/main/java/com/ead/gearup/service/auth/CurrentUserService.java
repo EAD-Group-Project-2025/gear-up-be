@@ -62,7 +62,7 @@ public class CurrentUserService {
 
         return switch (user.getRole()) {
             case CUSTOMER -> customerRepository.findByUser(user)
-                    .map(custromer -> custromer.getCustomerId())
+                    .map(customer -> customer.getCustomerId())
                     .orElse(null);
             case EMPLOYEE -> employeeRepository.findByUser(user)
                     .map(employee -> employee.getEmployeeId())

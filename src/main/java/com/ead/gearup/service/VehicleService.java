@@ -56,7 +56,7 @@ public class VehicleService {
         return converter.convertToResponseDto(savedVehicle);
     }
 
-    public VehicleResponseDTO getVehicalById(Long id) {
+    public VehicleResponseDTO getVehicleById(Long id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Invalid employee ID");
         }
@@ -68,8 +68,8 @@ public class VehicleService {
     }
 
     public List<VehicleResponseDTO> getAllVehicles() {
-        List<Vehicle> vehicels = vehicleRepository.findAll();
-        return vehicels.stream()
+        List<Vehicle> vehicles = vehicleRepository.findAll();
+        return vehicles.stream()
                 .map(vehicle -> converter.convertToResponseDto(vehicle))
                 .collect(Collectors.toList());
     }

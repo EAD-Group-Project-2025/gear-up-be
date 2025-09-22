@@ -145,7 +145,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
     
-    // Handle email not varified exception
+    // Handle email not verified exception
     @ExceptionHandler(EmailNotVerifiedException.class)
     public ResponseEntity<ApiResponseDTO<Object>> handleEmailNotVerified(
             EmailNotVerifiedException ex,

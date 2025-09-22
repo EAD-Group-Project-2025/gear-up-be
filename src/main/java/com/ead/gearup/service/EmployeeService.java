@@ -45,7 +45,7 @@ public class EmployeeService {
 
         if (currentUser.getRole() != UserRole.PUBLIC) {
             throw new UnauthorizedCustomerAccessException(
-                    "Only public users can create a customer profile");
+                    "Only public users can create an employee profile");
         }
 
         currentUser.setRole(UserRole.EMPLOYEE);

@@ -28,7 +28,7 @@ public class RoleBasedAccessService {
                 .orElse(null);
     }
 
-    // Check if the user has reqirued role
+    // Check if the user has required role
     public boolean hasRole(UserRole requiredRole) {
         UserRole currentRole = getCurrentUserRole();
         return currentRole != null && currentRole == requiredRole;

@@ -133,7 +133,7 @@ public class AuthService {
                         new UsernamePasswordAuthenticationToken(userLoginDTO.getEmail(), userLoginDTO.getPassword()));
 
         if (!authentication.isAuthenticated()) {
-            throw new BadCredentialsException("invalid credintials!");
+            throw new BadCredentialsException("invalid credentials!");
         }
 
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();

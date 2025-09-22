@@ -58,7 +58,7 @@ public class VehicleController {
     public ResponseEntity<ApiResponseDTO<VehicleResponseDTO>> getVehicleById(@PathVariable Long id,
             HttpServletRequest request) {
 
-        VehicleResponseDTO vehicle = vehicleService.getVehicalById(id);
+        VehicleResponseDTO vehicle = vehicleService.getVehicleById(id);
 
         ApiResponseDTO<VehicleResponseDTO> response = ApiResponseDTO.<VehicleResponseDTO>builder()
                 .status("success")

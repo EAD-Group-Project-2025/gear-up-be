@@ -58,7 +58,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // .requestMatchers("/api/customers/**").hasRole("CUSTOMER")
-                        .requestMatchers("/api/employees/**").hasRole("EMPLOYEES")
+                        // .requestMatchers("/api/employees/**").hasRole("EMPLOYEE")
                         .anyRequest().authenticated())
 
                 // Stateless session
