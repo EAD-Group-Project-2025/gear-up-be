@@ -29,7 +29,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping(value = "/api/vehicles")
+@RequestMapping(value = "/api/v1/vehicles")
 @SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class VehicleController {
