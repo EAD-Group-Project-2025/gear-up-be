@@ -72,7 +72,7 @@ public class Appointment {
 
     @OneToMany(mappedBy = "appointment", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Service> services = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
