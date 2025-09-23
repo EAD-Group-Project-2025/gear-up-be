@@ -2,6 +2,7 @@ package com.ead.gearup.dto.appointment;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,4 +21,5 @@ public class AppointmentResponseDTO {
     private Long vehicleId;
     private Long customerId;
     private Long employeeId;
+    private List<Long> taskIds;
 }

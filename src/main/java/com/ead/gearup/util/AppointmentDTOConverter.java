@@ -1,5 +1,7 @@
 package com.ead.gearup.util;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.ead.gearup.dto.appointment.AppointmentCreateDTO;
@@ -7,8 +9,10 @@ import com.ead.gearup.dto.appointment.AppointmentResponseDTO;
 import com.ead.gearup.dto.appointment.AppointmentUpdateDTO;
 import com.ead.gearup.model.Appointment;
 import com.ead.gearup.model.Customer;
+import com.ead.gearup.model.Task;
 import com.ead.gearup.model.Vehicle;
 import com.ead.gearup.repository.EmployeeRepository;
+import com.ead.gearup.repository.TaskRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class AppointmentDTOConverter {
 
     private final EmployeeRepository employeeRepository;
+    private final TaskRepository taskRepository;
 
     // Convert AppointmentDTO to Appointment entity
     public Appointment convertToEntity(AppointmentCreateDTO dto, Vehicle vehicle, Customer customer) {
@@ -42,6 +47,9 @@ public class AppointmentDTOConverter {
         dto.setEmployeeId(appointment.getEmployee() != null ? appointment.getEmployee().getEmployeeId() : null);
         dto.setStartTime(appointment.getStartTime() != null ? appointment.getStartTime() : null);
         dto.setEndTime(appointment.getEndTime() != null ? appointment.getEndTime() : null);
+        dto.setTaskIds(appointment.getTasks() != null
+                ? appointment.getTasks().stream().map(Task::getTaskId).toList()
+                : List.of());
         return dto;
     }
 
@@ -70,6 +78,15 @@ public class AppointmentDTOConverter {
         if (dto.getEmployeeId() != null) {
             appointment.setEmployee(employeeRepository.findById(dto.getEmployeeId())
                     .orElseThrow(() -> new IllegalArgumentException("Employee not found: " + dto.getEmployeeId())));
+        }
+
+        if (dto.getTaskId() != null) {
+            Task task = taskRepository.findById(dto.getTaskId()).orElseThrow(
+                    () -> new IllegalArgumentException("Task not found: " + dto.getTaskId()));
+
+            // link tasks to appointment
+            task.setAppointment(appointment);
+            appointment.setTasks(List.of(task));
         }
 
         return appointment;

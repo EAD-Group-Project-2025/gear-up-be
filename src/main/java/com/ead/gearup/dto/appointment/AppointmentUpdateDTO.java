@@ -35,4 +35,6 @@ public class AppointmentUpdateDTO {
     private LocalTime endTime;
 
     private Long employeeId;
+
+    private Long taskId;
 }

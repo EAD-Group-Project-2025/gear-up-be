@@ -8,9 +8,11 @@ import com.ead.gearup.model.Task;
 import com.ead.gearup.repository.TaskRepository;
 import com.ead.gearup.util.TaskDTOConverter;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class TaskService {
 

@@ -31,7 +31,7 @@ public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long serviceId;
+    private Long taskId;
 
     @Column(nullable = false)
     private String name;

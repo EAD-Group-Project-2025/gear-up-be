@@ -34,7 +34,7 @@ public class TaskDTOConverter {
     public TaskResponseDTO convertToResponseDto(Task task) {
         TaskResponseDTO dto = new TaskResponseDTO();
 
-        dto.setServiceId(task.getServiceId());
+        dto.setTaskId(task.getTaskId());
         dto.setName(task.getName());
         dto.setDescription(task.getDescription());
         dto.setEstimatedHours(task.getEstimatedHours());

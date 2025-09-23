@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TaskResponseDTO {
 
-    private Long serviceId;
+    private Long taskId;
     private String name;
     private String description;
     private Integer estimatedHours;
