@@ -2,8 +2,8 @@ package com.ead.gearup.util;
 
 import org.springframework.stereotype.Component;
 
-import com.ead.gearup.dto.service.TaskCreateDTO;
-import com.ead.gearup.dto.service.TaskResponseDTO;
+import com.ead.gearup.dto.task.TaskCreateDTO;
+import com.ead.gearup.dto.task.TaskResponseDTO;
 import com.ead.gearup.model.Task;
 import com.ead.gearup.repository.AppointmentRepository;
 

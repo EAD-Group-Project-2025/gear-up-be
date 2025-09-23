@@ -1,4 +1,4 @@
-package com.ead.gearup.dto.service;
+package com.ead.gearup.dto.task;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

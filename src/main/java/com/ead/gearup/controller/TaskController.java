@@ -8,11 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ead.gearup.dto.service.TaskCreateDTO;
-import com.ead.gearup.dto.service.TaskResponseDTO;
-import com.ead.gearup.enums.UserRole;
+import com.ead.gearup.dto.task.TaskCreateDTO;
+import com.ead.gearup.dto.task.TaskResponseDTO;
 import com.ead.gearup.service.TaskService;
-import com.ead.gearup.validation.RequiresRole;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
