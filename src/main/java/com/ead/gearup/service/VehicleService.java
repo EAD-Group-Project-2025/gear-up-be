@@ -10,6 +10,7 @@ import com.ead.gearup.dto.vehicle.VehicleResponseDTO;
 import com.ead.gearup.dto.vehicle.VehicleUpdateDTO;
 import com.ead.gearup.exception.CustomerNotFoundException;
 import com.ead.gearup.exception.UserNotFoundException;
+import com.ead.gearup.exception.VehicleNotFoundException;
 import com.ead.gearup.model.Customer;
 import com.ead.gearup.model.Vehicle;
 import com.ead.gearup.repository.CustomerRepository;
@@ -48,12 +49,9 @@ public class VehicleService {
                     throw new IllegalArgumentException("Vehicle with this VIN already exists");
                 });
 
-        Vehicle vehicle = converter.convertToEntity(createVehicleDTO);
+        Vehicle vehicle = converter.convertToEntity(createVehicleDTO, customer);
 
-        vehicle.setCustomer(customer);
-        Vehicle savedVehicle = vehicleRepository.save(vehicle);
-
-        return converter.convertToResponseDto(savedVehicle);
+        return converter.convertToResponseDto(vehicleRepository.save(vehicle));
     }
 
     public VehicleResponseDTO getVehicleById(Long id) {
@@ -93,7 +91,7 @@ public class VehicleService {
         }
 
         Vehicle existingVehicle = vehicleRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Vehicle not found with id: " + id));
+                .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found with id: " + id));
 
         converter.updateEntityFromDto(existingVehicle, updateVehicleDTO);
 
