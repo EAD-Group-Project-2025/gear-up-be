@@ -2,6 +2,7 @@ package com.ead.gearup.dto.appointment;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import com.ead.gearup.enums.AppointmentStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -36,5 +37,5 @@ public class AppointmentUpdateDTO {
 
     private Long employeeId;
 
-    private Long taskId;
+    private List<Long> taskIds; 
 }

@@ -80,13 +80,18 @@ public class AppointmentDTOConverter {
                     .orElseThrow(() -> new IllegalArgumentException("Employee not found: " + dto.getEmployeeId())));
         }
 
-        if (dto.getTaskId() != null) {
-            Task task = taskRepository.findById(dto.getTaskId()).orElseThrow(
-                    () -> new IllegalArgumentException("Task not found: " + dto.getTaskId()));
+        if (dto.getTaskIds() != null && !dto.getTaskIds().isEmpty()) {
+            List<Task> tasks = taskRepository.findAllById(dto.getTaskIds());
 
-            // link tasks to appointment
-            task.setAppointment(appointment);
-            appointment.setTasks(List.of(task));
+            if (tasks.size() != dto.getTaskIds().size()) {
+                throw new IllegalArgumentException("One or more tasks not found: " + dto.getTaskIds());
+            }
+
+            // link tasks to this appointment
+            tasks.forEach(task -> task.setAppointment(appointment));
+
+            // replace tasks list in appointment
+            appointment.setTasks(tasks);
         }
 
         return appointment;
