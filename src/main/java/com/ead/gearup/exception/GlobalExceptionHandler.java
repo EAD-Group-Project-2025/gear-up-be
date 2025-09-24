@@ -125,7 +125,24 @@ public class GlobalExceptionHandler {
                 .data(null)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+    
+    // Handle employee not found exception
+    @ExceptionHandler(EmployeeNotFoundException.class)
+    public ResponseEntity<ApiResponseDTO<Object>> handleEmployeeNotFound(
+            EmployeeNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                .status("error")
+                .message(ex.getMessage())
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(null)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     // Handle customer not found exception
@@ -142,7 +159,7 @@ public class GlobalExceptionHandler {
                 .data(null)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
     
     // Handle vehicle not found exception
@@ -159,9 +176,26 @@ public class GlobalExceptionHandler {
                 .data(null)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
+    // Handle appointment not found exception
+    @ExceptionHandler(AppointmentNotFoundException.class)
+    public ResponseEntity<ApiResponseDTO<Object>> handleAppointmentNotFound(
+            AppointmentNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                .status("error")
+                .message(ex.getMessage())
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(null)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+    
     // Handle email not verified exception
     @ExceptionHandler(EmailNotVerifiedException.class)
     public ResponseEntity<ApiResponseDTO<Object>> handleEmailNotVerified(
