@@ -32,7 +32,7 @@ public class CustomerController {
 
     @GetMapping
     @Operation(summary = "Get all customers")
-    @RequiresRole({ UserRole.CUSTOMER, UserRole.ADMIN, UserRole.EMPLOYEE })
+//     @RequiresRole({ UserRole.CUSTOMER, UserRole.ADMIN, UserRole.EMPLOYEE })
     public ResponseEntity<ApiResponseDTO<List<CustomerResponseDTO>>> getAll(HttpServletRequest request) {
         List<CustomerResponseDTO> customers = customerService.getAll();
 
@@ -49,7 +49,7 @@ public class CustomerController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get customer by ID")
-    @RequiresRole({ UserRole.CUSTOMER, UserRole.ADMIN, UserRole.EMPLOYEE })
+//     @RequiresRole({ UserRole.CUSTOMER, UserRole.ADMIN, UserRole.EMPLOYEE })
     public ResponseEntity<ApiResponseDTO<CustomerResponseDTO>> getById(@PathVariable Long id,
             HttpServletRequest request) {
         CustomerResponseDTO customer = customerService.getById(id);

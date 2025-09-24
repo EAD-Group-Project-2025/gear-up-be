@@ -18,9 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ead.gearup.dto.vehicle.VehicleCreateDTO;
 import com.ead.gearup.dto.vehicle.VehicleResponseDTO;
 import com.ead.gearup.dto.vehicle.VehicleUpdateDTO;
-import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.service.VehicleService;
-import com.ead.gearup.validation.RequiresRole;
 import com.ead.gearup.dto.response.ApiResponseDTO;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -36,7 +34,7 @@ public class VehicleController {
 
     private final VehicleService vehicleService;
 
-    @RequiresRole({ UserRole.CUSTOMER })
+//     @RequiresRole({ UserRole.CUSTOMER })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseDTO<VehicleResponseDTO>> createVehicle(
             @Valid @RequestBody VehicleCreateDTO vehicleCreateDTO, HttpServletRequest request) {

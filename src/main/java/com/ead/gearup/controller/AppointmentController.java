@@ -16,9 +16,7 @@ import com.ead.gearup.dto.appointment.AppointmentCreateDTO;
 import com.ead.gearup.dto.appointment.AppointmentResponseDTO;
 import com.ead.gearup.dto.appointment.AppointmentUpdateDTO;
 import com.ead.gearup.dto.response.ApiResponseDTO;
-import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.service.AppointmentService;
-import com.ead.gearup.validation.RequiresRole;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -31,7 +29,7 @@ public class AppointmentController {
 
     private final AppointmentService appointmentService;
 
-    @RequiresRole({ UserRole.CUSTOMER })
+    // @RequiresRole({ UserRole.CUSTOMER })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseDTO<AppointmentResponseDTO>> createAppointment(
             @RequestBody @Valid AppointmentCreateDTO appointmentCreateDTO, HttpServletRequest request) {
