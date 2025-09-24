@@ -8,6 +8,7 @@ import com.ead.gearup.dto.employee.CreateEmployeeDTO;
 import com.ead.gearup.dto.employee.EmployeeResponseDTO;
 import com.ead.gearup.dto.employee.UpdateEmployeeDTO;
 import com.ead.gearup.enums.UserRole;
+import com.ead.gearup.exception.EmployeeNotFoundException;
 import com.ead.gearup.exception.UnauthorizedCustomerAccessException;
 import com.ead.gearup.exception.UserNotFoundException;
 import com.ead.gearup.model.Employee;
@@ -40,7 +41,7 @@ public class EmployeeService {
         User currentUser = currentUserService.getCurrentUser();
 
         if (currentUser == null) {
-            throw new IllegalStateException("No authenticated user found");
+            throw new UserNotFoundException("No authenticated user found");
         }
 
         if (currentUser.getRole() != UserRole.PUBLIC) {
@@ -76,7 +77,7 @@ public class EmployeeService {
         }
 
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Employee not found with id: " + id));
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
         return converter.convertToResponseDto(employee);
     }
 
@@ -86,7 +87,7 @@ public class EmployeeService {
         }
 
         Employee existingEmployee = employeeRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Employee not found with id: " + id));
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
 
         converter.updateEntityFromDto(existingEmployee, updateEmployeeDTO);
 
@@ -101,7 +102,7 @@ public class EmployeeService {
         }
 
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new UserNotFoundException("Employee not found with id: " + employeeId));
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + employeeId));
 
         // Handle linked User
         User linkedUser = employee.getUser();

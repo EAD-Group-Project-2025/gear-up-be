@@ -9,7 +9,6 @@ import com.ead.gearup.dto.vehicle.VehicleCreateDTO;
 import com.ead.gearup.dto.vehicle.VehicleResponseDTO;
 import com.ead.gearup.dto.vehicle.VehicleUpdateDTO;
 import com.ead.gearup.exception.CustomerNotFoundException;
-import com.ead.gearup.exception.UserNotFoundException;
 import com.ead.gearup.exception.VehicleNotFoundException;
 import com.ead.gearup.model.Customer;
 import com.ead.gearup.model.Vehicle;
@@ -60,7 +59,7 @@ public class VehicleService {
         }
 
         Vehicle vehicle = vehicleRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Vehicle not found with id: " + id));
+                .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found with id: " + id));
 
         return converter.convertToResponseDto(vehicle);
     }
@@ -79,7 +78,7 @@ public class VehicleService {
         }
 
         if (!vehicleRepository.existsById(id)) {
-            throw new UserNotFoundException("Vehicle not found with id: " + id);
+            throw new VehicleNotFoundException("Vehicle not found with id: " + id);
         }
 
         vehicleRepository.deleteById(id);

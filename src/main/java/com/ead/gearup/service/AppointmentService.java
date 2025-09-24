@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.ead.gearup.dto.appointment.AppointmentCreateDTO;
 import com.ead.gearup.dto.appointment.AppointmentResponseDTO;
 import com.ead.gearup.dto.appointment.AppointmentUpdateDTO;
+import com.ead.gearup.exception.AppointmentNotFoundException;
 import com.ead.gearup.exception.CustomerNotFoundException;
 import com.ead.gearup.exception.VehicleNotFoundException;
 import com.ead.gearup.model.Appointment;
@@ -46,7 +47,7 @@ public class AppointmentService {
 
     public AppointmentResponseDTO updateAppointment(Long appointmentId, AppointmentUpdateDTO updateDTO) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appointmentId));
+                .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found: " + appointmentId));
 
         if (updateDTO.getStartTime() != null && updateDTO.getEndTime() != null) {
             if (updateDTO.getEndTime().isBefore(updateDTO.getStartTime())) {

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.ead.gearup.dto.appointment.AppointmentCreateDTO;
 import com.ead.gearup.dto.appointment.AppointmentResponseDTO;
 import com.ead.gearup.dto.appointment.AppointmentUpdateDTO;
+import com.ead.gearup.exception.EmployeeNotFoundException;
 import com.ead.gearup.model.Appointment;
 import com.ead.gearup.model.Customer;
 import com.ead.gearup.model.Task;
@@ -77,7 +78,7 @@ public class AppointmentDTOConverter {
 
         if (dto.getEmployeeId() != null) {
             appointment.setEmployee(employeeRepository.findById(dto.getEmployeeId())
-                    .orElseThrow(() -> new IllegalArgumentException("Employee not found: " + dto.getEmployeeId())));
+                    .orElseThrow(() -> new EmployeeNotFoundException("Employee not found: " + dto.getEmployeeId())));
         }
 
         if (dto.getTaskIds() != null && !dto.getTaskIds().isEmpty()) {
