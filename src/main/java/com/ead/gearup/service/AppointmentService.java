@@ -1,5 +1,7 @@
 package com.ead.gearup.service;
 
+import com.ead.gearup.enums.UserRole;
+import com.ead.gearup.exception.UnauthorizedAppointmentAccessException;
 import org.springframework.stereotype.Service;
 
 import com.ead.gearup.dto.appointment.AppointmentCreateDTO;
@@ -61,4 +63,21 @@ public class AppointmentService {
 
         return converter.convertToResponseDto(updatedAppointment);
     }
+
+    public AppointmentResponseDTO getAppointmentById(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found: " + appointmentId));
+
+        UserRole role = currentUserService.getCurrentUserRole();
+        if(role == UserRole.CUSTOMER){
+            Long customerId = currentUserService.getCurrentEntityId();
+            if(!appointment.getCustomer().getCustomerId().equals(customerId)){
+                throw new UnauthorizedAppointmentAccessException("You cannot access another customer's appointment: " + customerId);
+            }
+        }
+        return converter.convertToResponseDto(appointment);
+
+    }
+
+
 }
