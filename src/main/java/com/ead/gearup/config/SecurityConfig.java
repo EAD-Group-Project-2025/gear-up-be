@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -59,6 +60,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         // .requestMatchers("/api/v1/customers/**").hasRole("CUSTOMER")
                         // .requestMatchers("/api/v1/employees/**").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/appointments/**").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/appointments/**").hasAnyRole("CUSTOMER", "ADMIN","EMPLOYEE")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/appointments/**").hasAnyRole("CUSTOMER", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/appointments/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
 
                 // Stateless session
