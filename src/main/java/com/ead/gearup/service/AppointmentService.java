@@ -1,5 +1,6 @@
 package com.ead.gearup.service;
 
+import com.ead.gearup.enums.AppointmentStatus;
 import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.exception.UnauthorizedAppointmentAccessException;
 import org.springframework.stereotype.Service;
@@ -94,6 +95,22 @@ public class AppointmentService {
         return appointmentRepository.findAll().stream()
                 .map(converter::convertToResponseDto)
                 .toList();
+    }
+
+    public void deleteAppointment(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found: " + appointmentId));
+
+        UserRole role = currentUserService.getCurrentUserRole();
+
+        if(role == UserRole.CUSTOMER){
+            Long customerId = currentUserService.getCurrentEntityId();
+            if(!appointment.getCustomer().getCustomerId().equals(customerId)){
+                throw new UnauthorizedAppointmentAccessException("You cannot delete another customer's appointment: " + customerId);
+            }
+        }
+        appointment.setStatus(AppointmentStatus.CANCELED);
+        appointmentRepository.save(appointment);
     }
 
 

@@ -90,4 +90,18 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponseDTO<Void>> deleteAppointment(@PathVariable Long id, HttpServletRequest request) {
+        appointmentService.deleteAppointment(id);
+
+        ApiResponseDTO<Void> response = ApiResponseDTO.<Void>builder()
+                .status("success")
+                .message("Appointment canceled successfully")
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+    }
+
 }
