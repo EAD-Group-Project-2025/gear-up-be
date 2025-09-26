@@ -21,6 +21,8 @@ import com.ead.gearup.util.AppointmentDTOConverter;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AppointmentService {
@@ -77,6 +79,21 @@ public class AppointmentService {
         }
         return converter.convertToResponseDto(appointment);
 
+    }
+
+    public List<AppointmentResponseDTO> getAllAppointments() {
+        UserRole role = currentUserService.getCurrentUserRole();
+
+        if(role == UserRole.CUSTOMER){
+            Long customerId = currentUserService.getCurrentEntityId();
+            return appointmentRepository.findAll().stream()
+                    .filter(a->a.getCustomer().getCustomerId().equals(customerId))
+                    .map(converter::convertToResponseDto)
+                    .toList();
+        }
+        return appointmentRepository.findAll().stream()
+                .map(converter::convertToResponseDto)
+                .toList();
     }
 
 

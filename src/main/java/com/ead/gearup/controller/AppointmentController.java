@@ -1,6 +1,7 @@
 package com.ead.gearup.controller;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -67,6 +68,21 @@ public class AppointmentController {
                 .status("success")
                 .message("Appointment updated successfully")
                 .data(appointmentResponseDTO)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseDTO<List<AppointmentResponseDTO>>> getAllAppointments(HttpServletRequest request) {
+        List<AppointmentResponseDTO> appointments = appointmentService.getAllAppointments();
+
+        ApiResponseDTO<List<AppointmentResponseDTO>> response = ApiResponseDTO.<List<AppointmentResponseDTO>>builder()
+                .status("success")
+                .message("Appointments retrieved successfully")
+                .data(appointments)
                 .timestamp(Instant.now())
                 .path(request.getRequestURI())
                 .build();
