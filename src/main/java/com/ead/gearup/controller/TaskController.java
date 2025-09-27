@@ -3,6 +3,7 @@ package com.ead.gearup.controller;
 import java.time.Instant;
 import java.util.List;
 
+import com.ead.gearup.dto.task.TaskUpdateDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -73,5 +74,40 @@ public class TaskController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
    }
+
+   @PatchMapping(value = "/{id}",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+   public ResponseEntity<ApiResponseDTO<TaskResponseDTO>> updateTask(@PathVariable Long id,
+           @RequestBody @Valid TaskUpdateDTO taskUpdateDTO,HttpServletRequest request){
+
+        TaskResponseDTO updatedTask = taskService.updateTask(id,taskUpdateDTO);
+
+        ApiResponseDTO<TaskResponseDTO> response = ApiResponseDTO.<TaskResponseDTO>builder()
+                .status("success")
+                .message("Task updated successfully")
+                .data(updatedTask)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+   }
+
+   @DeleteMapping("/{id}")
+   public ResponseEntity<ApiResponseDTO<Void>> deleteTask(
+           @PathVariable Long id, HttpServletRequest request) {
+
+        taskService.deleteTask(id);
+
+        ApiResponseDTO<Void> response = ApiResponseDTO.<Void>builder()
+                .status("success")
+                .message("Task deleted successfully")
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+   }
+
+
 
 }

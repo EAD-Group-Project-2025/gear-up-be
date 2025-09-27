@@ -1,8 +1,10 @@
 package com.ead.gearup.service;
 
+import com.ead.gearup.dto.task.TaskUpdateDTO;
 import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.exception.AppointmentNotFoundException;
 import com.ead.gearup.exception.TaskNotFoundException;
+import com.ead.gearup.exception.UnauthorizedTaskAccessException;
 import com.ead.gearup.model.Appointment;
 import com.ead.gearup.repository.AppointmentRepository;
 import com.ead.gearup.service.auth.CurrentUserService;
@@ -95,6 +97,37 @@ public class TaskService {
         return taskRepository.findAll().stream()
                 .map(taskDTOConverter::convertToResponseDto)
                 .toList();
+    }
+
+    public TaskResponseDTO updateTask(Long taskId, TaskUpdateDTO taskUpdateDTO) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found " + taskId));
+
+        UserRole role = currentUserService.getCurrentUserRole();
+        if (role == UserRole.CUSTOMER) {
+            if(taskUpdateDTO.getStatus() == null){
+                throw new UnauthorizedTaskAccessException("Customers can only update task approval status.");
+            }
+            task.setStatus(taskUpdateDTO.getStatus());
+        }
+
+        Task updatedTask = taskDTOConverter.updateEntityFromDto(task, taskUpdateDTO);
+        taskRepository.save(updatedTask);
+
+        return taskDTOConverter.convertToResponseDto(updatedTask);
+    }
+
+    public void deleteTask(Long taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found " + taskId));
+
+        UserRole role = currentUserService.getCurrentUserRole();
+
+        if(role != UserRole.ADMIN) {
+            throw new UnauthorizedTaskAccessException("Only admins can delete task.");
+        }
+
+        taskRepository.delete(task);
     }
 
 
