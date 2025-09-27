@@ -59,6 +59,7 @@ public class TaskController {
 
    }
 
+   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
    public ResponseEntity<ApiResponseDTO<List<TaskResponseDTO>>> getAllTasks(HttpServletRequest request) {
         List<TaskResponseDTO> tasks = taskService.getAllTasks();
 
