@@ -5,10 +5,7 @@ import java.time.Instant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.ead.gearup.dto.response.ApiResponseDTO;
 import com.ead.gearup.dto.task.TaskCreateDTO;
@@ -43,4 +40,21 @@ public class TaskController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+   public ResponseEntity<ApiResponseDTO<TaskResponseDTO>> getTaskById(
+           @PathVariable Long id, HttpServletRequest request) {
+
+        TaskResponseDTO task = taskService.getTaskById(id);
+        ApiResponseDTO<TaskResponseDTO> response = ApiResponseDTO.<TaskResponseDTO>builder()
+                .status("success")
+                .message("Task fetched successfully")
+                .data(task)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+
+   }
 }

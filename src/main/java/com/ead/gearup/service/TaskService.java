@@ -1,5 +1,11 @@
 package com.ead.gearup.service;
 
+import com.ead.gearup.enums.UserRole;
+import com.ead.gearup.exception.AppointmentNotFoundException;
+import com.ead.gearup.exception.TaskNotFoundException;
+import com.ead.gearup.model.Appointment;
+import com.ead.gearup.repository.AppointmentRepository;
+import com.ead.gearup.service.auth.CurrentUserService;
 import org.springframework.stereotype.Service;
 
 import com.ead.gearup.dto.task.TaskCreateDTO;
@@ -18,13 +24,47 @@ public class TaskService {
 
     private final TaskDTOConverter taskDTOConverter;
     private final TaskRepository taskRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final CurrentUserService currentUserService;
 
     public TaskResponseDTO createTask(TaskCreateDTO taskCreateDTO) {
 
+        Appointment appointment = appointmentRepository.findById(taskCreateDTO.getAppointmentId())
+                .orElseThrow(()-> new AppointmentNotFoundException("Appointment not found"+taskCreateDTO.getAppointmentId()));
+
         Task task = taskDTOConverter.convertToEntity(taskCreateDTO);
+        task.setAppointment(appointment);
         taskRepository.save(task);
 
         return taskDTOConverter.convertToResponseDto(task);
     }
+
+    public TaskResponseDTO getTaskById(Long taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found "+taskId ));
+
+        UserRole role = currentUserService.getCurrentUserRole();
+
+        if(role == UserRole.CUSTOMER) {
+           Long customerId = currentUserService.getCurrentEntityId();
+           if(task.getProject() == null ||
+           !task.getProject().getCustomer().getCustomerId().equals(customerId)) {
+               throw new TaskNotFoundException("Task not found "+ taskId);
+           }
+        }
+
+        if(role == UserRole.EMPLOYEE) {
+            Long employeeId = currentUserService.getCurrentEntityId();
+            boolean assigned = task.getProject()!=null &&
+                    task.getProject().getAssignedEmployees().stream()
+                    .anyMatch(employee -> employee.getEmployeeId().equals(employeeId));
+            if(!assigned) {
+                throw new TaskNotFoundException("Task not found "+ taskId);
+            }
+        }
+
+        return taskDTOConverter.convertToResponseDto(task);
+    }
+
 
 }
