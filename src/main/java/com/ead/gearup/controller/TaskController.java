@@ -1,6 +1,7 @@
 package com.ead.gearup.controller;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -57,4 +58,19 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
 
    }
+
+   public ResponseEntity<ApiResponseDTO<List<TaskResponseDTO>>> getAllTasks(HttpServletRequest request) {
+        List<TaskResponseDTO> tasks = taskService.getAllTasks();
+
+        ApiResponseDTO<List<TaskResponseDTO>> response = ApiResponseDTO.<List<TaskResponseDTO>>builder()
+                .status("success")
+               .message("Task fetched successfully")
+               .data(tasks)
+               .timestamp(Instant.now())
+               .path(request.getRequestURI())
+               .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+   }
+
 }

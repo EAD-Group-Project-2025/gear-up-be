@@ -17,6 +17,8 @@ import com.ead.gearup.util.TaskDTOConverter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -64,6 +66,35 @@ public class TaskService {
         }
 
         return taskDTOConverter.convertToResponseDto(task);
+    }
+
+    public List<TaskResponseDTO> getAllTasks() {
+        UserRole role = currentUserService.getCurrentUserRole();
+
+        if(role == UserRole.CUSTOMER) {
+            Long customerId = currentUserService.getCurrentEntityId();
+
+            return taskRepository.findAll().stream()
+                    .filter(t->t.getProject() != null
+                    && t.getProject().getCustomer().getCustomerId().equals(customerId))
+                    .map(taskDTOConverter::convertToResponseDto)
+                    .toList();
+        }
+
+        if(role == UserRole.EMPLOYEE) {
+            Long employeeId = currentUserService.getCurrentEntityId();
+
+            return taskRepository.findAll().stream()
+                    .filter(t->t.getProject() != null
+                    && t.getProject().getAssignedEmployees().stream()
+                            .anyMatch(e->e.getEmployeeId().equals(employeeId)))
+                    .map(taskDTOConverter::convertToResponseDto)
+                    .toList();
+        }
+
+        return taskRepository.findAll().stream()
+                .map(taskDTOConverter::convertToResponseDto)
+                .toList();
     }
 
 
