@@ -60,14 +60,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         // .requestMatchers("/api/v1/customers/**").hasRole("CUSTOMER")
                         // .requestMatchers("/api/v1/employees/**").hasRole("EMPLOYEE")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/appointments/**").hasRole("CUSTOMER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/appointments/**").hasAnyRole("CUSTOMER", "ADMIN","EMPLOYEE")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/appointments/**").hasAnyRole("CUSTOMER", "EMPLOYEE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/appointments/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/appointments/**").hasAnyRole("ADMIN", "EMPLOYEE")
-                        .requestMatchers(HttpMethod.GET,"api/v1/tasks/**").hasAnyRole("ADMIN", "EMPLOYEE")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/tasks/**").hasAnyRole("ADMIN", "EMPLOYEE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/tasks/**").hasAnyRole("ADMIN")
                         .anyRequest().authenticated())
 
                 // Stateless session

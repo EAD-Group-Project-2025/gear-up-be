@@ -8,6 +8,7 @@ import com.ead.gearup.exception.UnauthorizedTaskAccessException;
 import com.ead.gearup.model.Appointment;
 import com.ead.gearup.repository.AppointmentRepository;
 import com.ead.gearup.service.auth.CurrentUserService;
+import com.ead.gearup.validation.RequiresRole;
 import org.springframework.stereotype.Service;
 
 import com.ead.gearup.dto.task.TaskCreateDTO;
@@ -31,6 +32,7 @@ public class TaskService {
     private final AppointmentRepository appointmentRepository;
     private final CurrentUserService currentUserService;
 
+    @RequiresRole({UserRole.EMPLOYEE, UserRole.ADMIN})
     public TaskResponseDTO createTask(TaskCreateDTO taskCreateDTO) {
 
         Appointment appointment = appointmentRepository.findById(taskCreateDTO.getAppointmentId())
@@ -43,6 +45,7 @@ public class TaskService {
         return taskDTOConverter.convertToResponseDto(task);
     }
 
+    @RequiresRole({UserRole.EMPLOYEE, UserRole.ADMIN, UserRole.CUSTOMER})
     public TaskResponseDTO getTaskById(Long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Task not found "+taskId ));
@@ -57,19 +60,20 @@ public class TaskService {
            }
         }
 
-        if(role == UserRole.EMPLOYEE) {
-            Long employeeId = currentUserService.getCurrentEntityId();
-            boolean assigned = task.getProject()!=null &&
-                    task.getProject().getAssignedEmployees().stream()
-                    .anyMatch(employee -> employee.getEmployeeId().equals(employeeId));
-            if(!assigned) {
-                throw new TaskNotFoundException("Task not found "+ taskId);
-            }
-        }
+//        if(role == UserRole.EMPLOYEE) {
+//            Long employeeId = currentUserService.getCurrentEntityId();
+//            boolean assigned = task.getProject()!=null &&
+//                    task.getProject().getAssignedEmployees().stream()
+//                    .anyMatch(employee -> employee.getEmployeeId().equals(employeeId));
+//            if(!assigned) {
+//                throw new TaskNotFoundException("Task not found "+ taskId);
+//            }
+//        }
 
         return taskDTOConverter.convertToResponseDto(task);
     }
 
+    @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN, UserRole.EMPLOYEE})
     public List<TaskResponseDTO> getAllTasks() {
         UserRole role = currentUserService.getCurrentUserRole();
 
@@ -83,22 +87,23 @@ public class TaskService {
                     .toList();
         }
 
-        if(role == UserRole.EMPLOYEE) {
-            Long employeeId = currentUserService.getCurrentEntityId();
-
-            return taskRepository.findAll().stream()
-                    .filter(t->t.getProject() != null
-                    && t.getProject().getAssignedEmployees().stream()
-                            .anyMatch(e->e.getEmployeeId().equals(employeeId)))
-                    .map(taskDTOConverter::convertToResponseDto)
-                    .toList();
-        }
+//        if(role == UserRole.EMPLOYEE) {
+//            Long employeeId = currentUserService.getCurrentEntityId();
+//
+//            return taskRepository.findAll().stream()
+//                    .filter(t->t.getProject() != null
+//                    && t.getProject().getAssignedEmployees().stream()
+//                            .anyMatch(e->e.getEmployeeId().equals(employeeId)))
+//                    .map(taskDTOConverter::convertToResponseDto)
+//                    .toList();
+//        }
 
         return taskRepository.findAll().stream()
                 .map(taskDTOConverter::convertToResponseDto)
                 .toList();
     }
 
+    @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN, UserRole.EMPLOYEE})
     public TaskResponseDTO updateTask(Long taskId, TaskUpdateDTO taskUpdateDTO) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Task not found " + taskId));
@@ -117,6 +122,7 @@ public class TaskService {
         return taskDTOConverter.convertToResponseDto(updatedTask);
     }
 
+    @RequiresRole(UserRole.ADMIN)
     public void deleteTask(Long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Task not found " + taskId));
