@@ -1,7 +1,7 @@
 package com.ead.gearup.enums;
 
 public enum ProjectStatus {
-    PLANNED,
+    CREATED,
     IN_PROGRESS,
     COMPLETED,
     CANCELLED

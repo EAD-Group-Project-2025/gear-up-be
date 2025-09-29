@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -13,6 +14,10 @@ public class CreateProjectDTO {
     private String name;
 
     private String description;
+
+    private LocalDate startDate;
+
+    private LocalDate endDate;
 
     @NotNull
     private Long appointmentId;
