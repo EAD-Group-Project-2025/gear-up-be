@@ -1,5 +1,9 @@
 package com.ead.gearup.service;
 
+import com.ead.gearup.enums.AppointmentStatus;
+import com.ead.gearup.enums.UserRole;
+import com.ead.gearup.exception.UnauthorizedAppointmentAccessException;
+import com.ead.gearup.validation.RequiresRole;
 import org.springframework.stereotype.Service;
 
 import com.ead.gearup.dto.appointment.AppointmentCreateDTO;
@@ -19,6 +23,8 @@ import com.ead.gearup.util.AppointmentDTOConverter;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AppointmentService {
@@ -29,6 +35,7 @@ public class AppointmentService {
     private final AppointmentDTOConverter converter;
     private final AppointmentRepository appointmentRepository;
 
+    @RequiresRole(UserRole.CUSTOMER)
     public AppointmentResponseDTO createAppointment(AppointmentCreateDTO appointmentCreateDTO) {
         Customer customer = customerRepository.findById(currentUserService.getCurrentEntityId())
                 .orElseThrow(() -> new CustomerNotFoundException(
@@ -39,12 +46,12 @@ public class AppointmentService {
                         "Vehicle not found: " + appointmentCreateDTO.getVehicleId()));
 
         Appointment appointment = converter.convertToEntity(appointmentCreateDTO, vehicle, customer);
-
         appointmentRepository.save(appointment);
 
         return converter.convertToResponseDto(appointment);
     }
 
+    @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN})
     public AppointmentResponseDTO updateAppointment(Long appointmentId, AppointmentUpdateDTO updateDTO) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found: " + appointmentId));
@@ -55,10 +62,69 @@ public class AppointmentService {
             }
         }
 
-        Appointment updatedAppointment = converter.updateEntityFromDto(appointment, updateDTO);
+        if (currentUserService.getCurrentUserRole() == UserRole.CUSTOMER) {
+            Long customerId = currentUserService.getCurrentEntityId();
+            if (!appointment.getCustomer().getCustomerId().equals(customerId)) {
+                throw new UnauthorizedAppointmentAccessException("You cannot update another customer's appointment");
+            }
+        }
 
+        Appointment updatedAppointment = converter.updateEntityFromDto(appointment, updateDTO);
         appointmentRepository.save(updatedAppointment);
 
         return converter.convertToResponseDto(updatedAppointment);
     }
+
+    @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN})
+    public AppointmentResponseDTO getAppointmentById(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found: " + appointmentId));
+
+        UserRole role = currentUserService.getCurrentUserRole();
+        if(role == UserRole.CUSTOMER){
+            Long customerId = currentUserService.getCurrentEntityId();
+            if(!appointment.getCustomer().getCustomerId().equals(customerId)){
+                throw new UnauthorizedAppointmentAccessException("You cannot access another customer's appointment: " + customerId);
+            }
+        }
+        return converter.convertToResponseDto(appointment);
+
+    }
+
+    @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN})
+    public List<AppointmentResponseDTO> getAllAppointments() {
+        UserRole role = currentUserService.getCurrentUserRole();
+
+        if(role == UserRole.CUSTOMER){
+            Long customerId = currentUserService.getCurrentEntityId();
+            return appointmentRepository.findAll().stream()
+                    .filter(a->a.getCustomer().getCustomerId().equals(customerId))
+                    .map(converter::convertToResponseDto)
+                    .toList();
+        }
+        return appointmentRepository.findAll().stream()
+                .map(converter::convertToResponseDto)
+                .toList();
+    }
+
+    @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN})
+    public void deleteAppointment(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found: " + appointmentId));
+
+        UserRole role = currentUserService.getCurrentUserRole();
+
+        if(role == UserRole.CUSTOMER){
+            Long customerId = currentUserService.getCurrentEntityId();
+            if(!appointment.getCustomer().getCustomerId().equals(customerId)){
+                throw new UnauthorizedAppointmentAccessException("You cannot delete another customer's appointment: " + customerId);
+            }
+        }
+        appointment.setStatus(AppointmentStatus.CANCELED);
+        appointmentRepository.save(appointment);
+    }
+
+
+
+
 }

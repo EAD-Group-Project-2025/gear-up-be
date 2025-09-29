@@ -1,13 +1,12 @@
 package com.ead.gearup.util;
 
-import org.springframework.stereotype.Component;
-
 import com.ead.gearup.dto.task.TaskCreateDTO;
 import com.ead.gearup.dto.task.TaskResponseDTO;
+import com.ead.gearup.dto.task.TaskUpdateDTO;
 import com.ead.gearup.model.Task;
 import com.ead.gearup.repository.AppointmentRepository;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
@@ -31,6 +30,7 @@ public class TaskDTOConverter {
         return task;
     }
 
+    // Convert Task entity to Response DTO
     public TaskResponseDTO convertToResponseDto(Task task) {
         TaskResponseDTO dto = new TaskResponseDTO();
 
@@ -42,8 +42,27 @@ public class TaskDTOConverter {
         dto.setAppointmentId(task.getAppointment().getAppointmentId());
         dto.setStatus(task.getStatus().name());
         dto.setAssignedProject(task.isAssignedProject());
-        dto.setAppointmentId(task.getAppointment().getAppointmentId());
 
         return dto;
+    }
+
+    // Update Task entity from TaskUpdateDTO (partial update)
+    public Task updateEntityFromDto(Task task, TaskUpdateDTO dto) {
+        if (dto.getName() != null) {
+            task.setName(dto.getName());
+        }
+        if (dto.getDescription() != null) {
+            task.setDescription(dto.getDescription());
+        }
+        if (dto.getEstimatedHours() != null) {
+            task.setEstimatedHours(dto.getEstimatedHours());
+        }
+        if (dto.getCost() != null) {
+            task.setCost(dto.getCost());
+        }
+        if (dto.getStatus() != null) {
+            task.setStatus(dto.getStatus());
+        }
+        return task;
     }
 }
