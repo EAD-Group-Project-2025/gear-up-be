@@ -1,7 +1,6 @@
 package com.ead.gearup.dto.project;
 
 import com.ead.gearup.enums.ProjectStatus;
-import com.ead.gearup.model.Task;
 import lombok.Data;
 
 import java.time.LocalDate;
