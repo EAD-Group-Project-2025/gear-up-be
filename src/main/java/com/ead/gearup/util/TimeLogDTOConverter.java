@@ -8,15 +8,18 @@ import com.ead.gearup.dto.timelog.CreateTimeLogDTO;
 import com.ead.gearup.dto.timelog.TimeLogResponseDTO;
 import com.ead.gearup.dto.timelog.UpdateTimeLogDTO;
 import com.ead.gearup.model.Employee;
+import com.ead.gearup.model.Task;
 import com.ead.gearup.model.TimeLog;
 
 @Component
 public class TimeLogDTOConverter {
 
     // Convert Create DTO -> Entity 
-    public TimeLog convertToEntity(CreateTimeLogDTO createTimeLogDTO, Employee employee) {
+    public TimeLog convertToEntity(CreateTimeLogDTO createTimeLogDTO, Employee employee, Task task) {
         TimeLog timeLog = new TimeLog();
         timeLog.setEmployee(employee);
+        timeLog.setTask(task);
+      //  timeLog.setProject(project);
         timeLog.setDescription(createTimeLogDTO.getDescription());
         timeLog.setStartTime(createTimeLogDTO.getStartTime());
         timeLog.setEndTime(createTimeLogDTO.getEndTime());
@@ -34,6 +37,7 @@ public class TimeLogDTOConverter {
             ? timeLog.getHoursWorked() 
             : calculateHoursWorked(timeLog));
         responseDTO.setLoggedAt(timeLog.getLoggedAt());
+        responseDTO.setTaskId(timeLog.getTask().getTaskId());
         return responseDTO;
     }
 
