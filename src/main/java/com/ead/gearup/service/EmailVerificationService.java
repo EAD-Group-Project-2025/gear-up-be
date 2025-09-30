@@ -29,7 +29,7 @@ public class EmailVerificationService {
 
             String token = jwtService.generateEmailVerificationToken(userDetails);
 
-            String verificationUrl = appBaseUrl + "/api/auth/v1/verify-email?token=" + token;
+            String verificationUrl = appBaseUrl + "/api/v1/auth/verify-email?token=" + token;
 
             // Send email
             emailService.sendVerificationEmail(user.getEmail(), user.getName(), verificationUrl);
