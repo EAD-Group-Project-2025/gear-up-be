@@ -50,6 +50,14 @@ public class TimeLog {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = "project_id")
+    // private  project;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_id")
+    private Task task;
+
     @PrePersist
     public void prePersist() {
         this.loggedAt = LocalDateTime.now();
