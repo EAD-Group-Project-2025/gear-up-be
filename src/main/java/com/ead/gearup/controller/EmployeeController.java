@@ -19,7 +19,7 @@ import java.time.Instant;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/employees")
+@RequestMapping("/api/v1/employees")
 @SecurityRequirement(name = "bearerAuth")
 public class EmployeeController {
 
