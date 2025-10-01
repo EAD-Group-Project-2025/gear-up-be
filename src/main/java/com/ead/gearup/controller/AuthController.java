@@ -1,0 +1,190 @@
+package com.ead.gearup.controller;
+
+import java.time.Duration;
+import java.time.Instant;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.ead.gearup.dto.request.ResendEmailRequestDTO;
+import com.ead.gearup.dto.response.ApiResponseDTO;
+import com.ead.gearup.dto.response.JwtTokensDTO;
+import com.ead.gearup.dto.response.LoginResponseDTO;
+import com.ead.gearup.dto.response.UserResponseDTO;
+import com.ead.gearup.dto.user.UserCreateDTO;
+import com.ead.gearup.dto.user.UserLoginDTO;
+import com.ead.gearup.service.AuthService;
+import com.ead.gearup.service.auth.JwtService;
+
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/api/v1/auth/")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final JwtService jwtService;
+    private final AuthService authService;
+
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseDTO<UserResponseDTO>> createUser(
+            @Valid @RequestBody UserCreateDTO userCreateDTO,
+            HttpServletRequest request) {
+
+        UserResponseDTO createdUser = authService.createUser(userCreateDTO);
+
+        ApiResponseDTO<UserResponseDTO> apiResponse = ApiResponseDTO.<UserResponseDTO>builder()
+                .status("success")
+                .message("User registered successfully! Please verify your email to activate your account.")
+                .data(createdUser)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<ApiResponseDTO<Object>> verifyEmail(
+            @RequestParam("token") String token,
+            HttpServletRequest request) {
+
+        boolean verified = authService.verifyEmailToken(token);
+
+        ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                .status(verified ? "success" : "error")
+                .message(verified ? "Email verified successfully!" : "Invalid or expired verification token")
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(null)
+                .build();
+
+        return verified
+                ? ResponseEntity.ok(response)
+                : ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @PostMapping("/resend-email")
+    public ResponseEntity<ApiResponseDTO<Object>> resendEmail(
+            @Valid @RequestBody ResendEmailRequestDTO resendEmailRequestDTO,
+            HttpServletRequest httpRequest) {
+
+        authService.resendEmail(resendEmailRequestDTO);
+
+        ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                .status("success")
+                .message("Verification email resent successfully")
+                .timestamp(Instant.now())
+                .path(httpRequest.getRequestURI())
+                .data(null)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseDTO<LoginResponseDTO>> verifyUser(
+            @Valid @RequestBody UserLoginDTO userLoginDTO,
+            HttpServletRequest request) {
+
+        JwtTokensDTO tokens = authService.verifyUser(userLoginDTO);
+
+        // HttpOnly refresh token cookie
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/auth/refresh")
+                .maxAge(Duration.ofMillis(jwtService.getRefreshTokenDurationMs()))
+                .sameSite("None")
+                .build();
+
+        LoginResponseDTO loginResponse = new LoginResponseDTO();
+        loginResponse.setAccessToken(tokens.getAccessToken());
+
+        ApiResponseDTO<LoginResponseDTO> apiResponse = ApiResponseDTO.<LoginResponseDTO>builder()
+                .status("success")
+                .message("Login successful")
+                .data(loginResponse)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(apiResponse);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponseDTO<LoginResponseDTO>> refreshToken(
+            @CookieValue(name = "refreshToken", required = false) String refreshToken,
+            HttpServletRequest request) {
+
+        if (refreshToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        LoginResponseDTO loginResponse = authService.getRefreshAccessToken(refreshToken);
+
+        ApiResponseDTO<LoginResponseDTO> apiResponse = ApiResponseDTO.<LoginResponseDTO>builder()
+                .status("success")
+                .message("Token refreshed successfully")
+                .data(loginResponse)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponseDTO<Object>> logout(
+            @CookieValue(name = "refreshToken", required = false) String refreshToken,
+            HttpServletRequest request) {
+
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                    .status("error")
+                    .message("No active session found or already logged out")
+                    .data(null)
+                    .timestamp(Instant.now())
+                    .path(request.getRequestURI())
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        // Clear the refresh token cookie
+        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/auth/refresh")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+
+        ApiResponseDTO<Object> apiResponse = ApiResponseDTO.builder()
+                .status("success")
+                .message("Logged out successfully")
+                .data(null)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .body(apiResponse);
+    }
+}

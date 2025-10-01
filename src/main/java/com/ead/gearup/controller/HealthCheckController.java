@@ -7,15 +7,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/public/v1/health-check")
+@RequestMapping("/api/v1/health-check")
 @SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Health Check API", description = "Endpoints to verify the availability and status of the application")
 public class HealthCheckController {
 
     @GetMapping
+    // @RequiresRole({ UserRole.CUSTOMER })
     public ResponseEntity<String> healthCheck() {
-        String message = "voluntrix-backend is running successfully";
-        return new ResponseEntity<>(message, HttpStatus.OK);
+        String message = "gearup-backend is running successfully";
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 }
