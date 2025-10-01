@@ -17,6 +17,7 @@ import com.ead.gearup.dto.response.LoginResponseDTO;
 import com.ead.gearup.dto.response.UserResponseDTO;
 import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
+import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.exception.EmailAlreadyExistsException;
 import com.ead.gearup.exception.InvalidRefreshTokenException;
 import com.ead.gearup.exception.ResendEmailCooldownException;
@@ -55,6 +56,7 @@ public class AuthService {
                 .email(email)
                 .name(userCreateDTO.getName())
                 .password(encoder.encode(userCreateDTO.getPassword()))
+                .role(UserRole.CUSTOMER) // Self-registered users are always CUSTOMER
                 .createdAt(LocalDateTime.now())
                 .build();
 

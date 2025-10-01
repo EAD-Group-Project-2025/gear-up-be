@@ -49,7 +49,10 @@ public class JwtService {
                 .findFirst()
                 .orElse("ROLE_PUBLIC");
 
-        extraClaims.put("role", role);
+        // Remove "ROLE_" prefix if present for JWT token
+        String roleWithoutPrefix = role.startsWith("ROLE_") ? role.substring(5) : role;
+
+        extraClaims.put("role", roleWithoutPrefix);
         extraClaims.put("token_type", "access");
 
         return Jwts.builder()
@@ -72,8 +75,11 @@ public class JwtService {
                 .findFirst()
                 .orElse("ROLE_PUBLIC");
 
+        // Remove "ROLE_" prefix if present for JWT token
+        String roleWithoutPrefix = role.startsWith("ROLE_") ? role.substring(5) : role;
+
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", role);
+        claims.put("role", roleWithoutPrefix);
         claims.put("token_type", "refresh");
 
         return Jwts.builder()
