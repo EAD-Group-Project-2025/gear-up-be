@@ -79,9 +79,7 @@ public class TimeLog {
             long seconds = Duration.between(startTime, endTime).getSeconds();
             double rawHours = seconds / 3600.0;
 
-            this.hoursWorked = BigDecimal.valueOf(rawHours)
-                    .setScale(2, RoundingMode.HALF_UP)
-                    .doubleValue();
+            this.hoursWorked = Math.round(rawHours * 100.0) / 100.0;
         } else {
             this.hoursWorked = 0.0;
         }
