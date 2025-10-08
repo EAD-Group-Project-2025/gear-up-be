@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/timelogs")
+@RequestMapping("/api/v1/timelogs")
 public class TimeLogController {
 
     private final TimeLogService timeLogService;
