@@ -1,6 +1,7 @@
 package com.ead.gearup.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -27,7 +28,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TimeLog {
 
-    @Id 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long logId;
 
@@ -70,19 +71,19 @@ public class TimeLog {
     }
 
     private void validateAndCalculate() {
-    if (startTime != null && endTime != null) {
-        if (!endTime.isAfter(startTime)) {
-            throw new IllegalArgumentException("End time must be after start time");
+        if (startTime != null && endTime != null) {
+            if (!endTime.isAfter(startTime)) {
+                throw new IllegalArgumentException("End time must be after start time");
+            }
+
+            long seconds = Duration.between(startTime, endTime).getSeconds();
+            double rawHours = seconds / 3600.0;
+
+            this.hoursWorked = BigDecimal.valueOf(rawHours)
+                    .setScale(2, RoundingMode.HALF_UP)
+                    .doubleValue();
+        } else {
+            this.hoursWorked = 0.0;
         }
-
-        long seconds = Duration.between(startTime, endTime).getSeconds();
-        double rawHours = seconds / 3600.0;
-
-        this.hoursWorked = BigDecimal.valueOf(rawHours)
-                .setScale(2, BigDecimal.ROUND_HALF_UP)
-                .doubleValue();
-    } else {
-        this.hoursWorked = 0.0;
     }
-   }
 }
