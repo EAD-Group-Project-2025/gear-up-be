@@ -206,7 +206,7 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
                 .httpOnly(true)
                 .secure(true)
-                .path("/api/auth/refresh")
+                .path("/api/v1/auth/refresh")
                 .maxAge(Duration.ofMillis(jwtService.getRefreshTokenDurationMs()))
                 .sameSite("None")
                 .build();
@@ -270,7 +270,7 @@ public class AuthController {
         ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
                 .secure(true)
-                .path("/api/auth/refresh")
+                .path("/api/v1/auth/refresh")
                 .maxAge(0)
                 .sameSite("None")
                 .build();

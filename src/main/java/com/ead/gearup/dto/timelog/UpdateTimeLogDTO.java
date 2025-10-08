@@ -13,5 +13,4 @@ public class UpdateTimeLogDTO {
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    
 }
