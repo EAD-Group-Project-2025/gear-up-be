@@ -5,6 +5,8 @@ import com.ead.gearup.dto.project.UpdateProjectDTO;
 import com.ead.gearup.dto.response.ApiResponseDTO;
 import com.ead.gearup.dto.project.ProjectResponseDTO;
 import com.ead.gearup.service.ProjectService;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
 
     private final ProjectService projectService;
