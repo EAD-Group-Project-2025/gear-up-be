@@ -57,7 +57,7 @@ public class TimeLogDTOConverter {
 
     private Double calculateHoursWorked(TimeLog timeLog) {
         if (timeLog.getStartTime() != null && timeLog.getEndTime() != null) {
-            return Duration.between(timeLog.getStartTime(), timeLog.getEndTime()).toMinutes() / 60.0;
+            return Duration.between(timeLog.getStartTime(), timeLog.getEndTime()).getSeconds() / 3600.0;
         }
         return 0.0;
     }
