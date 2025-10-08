@@ -4,6 +4,9 @@ import com.ead.gearup.enums.AppointmentStatus;
 import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.exception.UnauthorizedAppointmentAccessException;
 import com.ead.gearup.validation.RequiresRole;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 
 import com.ead.gearup.dto.appointment.AppointmentCreateDTO;
@@ -27,6 +30,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AppointmentService {
 
     private final CurrentUserService currentUserService;
