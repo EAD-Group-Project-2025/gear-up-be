@@ -27,6 +27,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,14 +43,55 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/auth/")
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "Authentication and user management endpoints")
 public class AuthController {
 
     private final JwtService jwtService;
     private final AuthService authService;
 
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+        summary = "Register a new user",
+        description = "Creates a new user account. After registration, a verification email will be sent to the provided email address."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "User registered successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponseDTO.class),
+                examples = @ExampleObject(value = """
+                    {
+                        "status": "success",
+                        "message": "User registered successfully! Please verify your email to activate your account.",
+                        "data": {
+                            "id": "123e4567-e89b-12d3-a456-426614174000",
+                            "firstName": "John",
+                            "lastName": "Doe",
+                            "email": "john.doe@example.com",
+                            "role": "CUSTOMER",
+                            "isEmailVerified": false
+                        },
+                        "timestamp": "2023-10-15T10:30:00Z",
+                        "path": "/api/v1/auth/register"
+                    }
+                    """)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input data or email already exists",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponseDTO.class)
+            )
+        )
+    })
     public ResponseEntity<ApiResponseDTO<UserResponseDTO>> createUser(
-            @Valid @RequestBody UserCreateDTO userCreateDTO,
+            @Valid @RequestBody 
+            @Parameter(description = "User registration details", required = true)
+            UserCreateDTO userCreateDTO,
             HttpServletRequest request) {
 
         UserResponseDTO createdUser = authService.createUser(userCreateDTO);
@@ -58,8 +108,32 @@ public class AuthController {
     }
 
     @GetMapping("/verify-email")
+    @Operation(
+        summary = "Verify email address",
+        description = "Verifies a user's email address using the verification token sent via email"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Email verified successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponseDTO.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid or expired verification token",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponseDTO.class)
+            )
+        )
+    })
     public ResponseEntity<ApiResponseDTO<Object>> verifyEmail(
-            @RequestParam("token") String token,
+            @RequestParam("token") 
+            @Parameter(description = "Email verification token", required = true, example = "eyJhbGciOiJIUzI1NiJ9...")
+            String token,
             HttpServletRequest request) {
 
         boolean verified = authService.verifyEmailToken(token);
@@ -78,8 +152,32 @@ public class AuthController {
     }
 
     @PostMapping("/resend-email")
+    @Operation(
+        summary = "Resend verification email",
+        description = "Resends the email verification link to the user's email address"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Verification email resent successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponseDTO.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid email or user not found",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponseDTO.class)
+            )
+        )
+    })
     public ResponseEntity<ApiResponseDTO<Object>> resendEmail(
-            @Valid @RequestBody ResendEmailRequestDTO resendEmailRequestDTO,
+            @Valid @RequestBody 
+            @Parameter(description = "Email address to resend verification", required = true)
+            ResendEmailRequestDTO resendEmailRequestDTO,
             HttpServletRequest httpRequest) {
 
         authService.resendEmail(resendEmailRequestDTO);
