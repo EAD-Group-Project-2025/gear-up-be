@@ -50,9 +50,9 @@ public class TimeLog {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "project_id")
-    // private  project;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
+    private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")

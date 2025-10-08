@@ -5,7 +5,9 @@ import com.ead.gearup.exception.ResourceNotFoundException;
 import com.ead.gearup.model.Employee;
 import com.ead.gearup.model.Task;
 import com.ead.gearup.model.TimeLog;
+import com.ead.gearup.model.Project;
 import com.ead.gearup.repository.EmployeeRepository;
+import com.ead.gearup.repository.ProjectRepository;
 import com.ead.gearup.repository.TaskRepository;
 import com.ead.gearup.repository.TimeLogRepository;
 import com.ead.gearup.util.TimeLogDTOConverter;
@@ -24,15 +26,18 @@ public class TimeLogService {
     private final TimeLogDTOConverter converter;
     private final EmployeeRepository employeeRepository;
     private final TaskRepository taskRepository;
+    private final ProjectRepository projectRepository;
 
     public TimeLogService(TimeLogRepository timeLogRepository,
                           TimeLogDTOConverter converter,
                           EmployeeRepository employeeRepository,
-                          TaskRepository taskRepository) {
+                          TaskRepository taskRepository,
+                          ProjectRepository projectRepository) {
         this.timeLogRepository = timeLogRepository;
         this.converter = converter;
         this.employeeRepository = employeeRepository;
         this.taskRepository = taskRepository;
+        this.projectRepository = projectRepository;
     }
 
     public TimeLogResponseDTO createTimeLog(CreateTimeLogDTO dto) {
@@ -42,7 +47,10 @@ public class TimeLogService {
         Task task = taskRepository.findById(dto.getTaskId())
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id " + dto.getTaskId()));
 
-        TimeLog timeLog = converter.convertToEntity(dto, employee, task);
+        Project project = projectRepository.findById(dto.getProjectId())
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found with id " + dto.getProjectId()));
+
+        TimeLog timeLog = converter.convertToEntity(dto, employee, task, project);
         TimeLog saved = timeLogRepository.save(timeLog);
         return converter.convertToResponseDTO(saved);
     }

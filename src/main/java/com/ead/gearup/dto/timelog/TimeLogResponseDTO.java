@@ -18,7 +18,7 @@ public class TimeLogResponseDTO {
     private LocalDateTime loggedAt;
     private Long taskId;
     private String taskName;
-    //private Long projectId;
-    //private String projectName;
+    private Long projectId;
+    private String projectName;
     
 }

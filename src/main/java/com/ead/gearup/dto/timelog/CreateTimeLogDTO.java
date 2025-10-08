@@ -15,5 +15,5 @@ public class CreateTimeLogDTO {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Long taskId;
-   // private String projectId;
+    private Long projectId;
 }
