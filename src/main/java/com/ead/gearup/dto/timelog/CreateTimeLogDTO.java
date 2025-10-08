@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateTimeLogDTO {
-    private Long employeeId;
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
