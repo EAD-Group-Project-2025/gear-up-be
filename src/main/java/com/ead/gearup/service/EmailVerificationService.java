@@ -22,6 +22,9 @@ public class EmailVerificationService {
     @Value("${app.base-url}")
     private String appBaseUrl;
 
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     public void sendVerificationEmail(User user) {
         try {
             // Create UserDetails manually, no verification check
@@ -29,7 +32,7 @@ public class EmailVerificationService {
 
             String token = jwtService.generateEmailVerificationToken(userDetails);
 
-            String verificationUrl = appBaseUrl + "/api/auth/v1/verify-email?token=" + token;
+            String verificationUrl = appBaseUrl + "/api/v1/auth/verify-email?token=" + token;
 
             // Send email
             emailService.sendVerificationEmail(user.getEmail(), user.getName(), verificationUrl);

@@ -45,6 +45,11 @@ public class Task {
     @Column(nullable = false)
     private Double cost;
 
+    @ManyToOne
+    @JoinColumn(name = "project_id") // foreign key column
+    private Project project;
+
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private TaskStatus status = TaskStatus.PENDING;
