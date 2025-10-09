@@ -1,0 +1,4 @@
+type Query {
+  healthCheck: String
+  searchAppointmentsByCustomerName(name: String!): [Appointment]
+}
