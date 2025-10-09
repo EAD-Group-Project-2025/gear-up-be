@@ -160,7 +160,49 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-   
+    
+
+    @GetMapping("/filter-by-date")
+    public ResponseEntity<ApiResponseDTO<List<AppointmentResponseDTO>>> getAppointmentsByDate(
+        @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, HttpServletRequest request) {
+            Long employeeId = currentUserService.getCurrentEntityId();
+
+            List<AppointmentResponseDTO> appointments = appointmentService.getAppointmentsByDate(employeeId, date);
+
+            ApiResponseDTO<List<AppointmentResponseDTO>> response = ApiResponseDTO.<List<AppointmentResponseDTO>>builder()
+                    .status("success")
+                    .message("Appointments for the date retrieved successfully")
+                    .data(appointments)
+                    .timestamp(Instant.now())
+                    .path(request.getRequestURI())
+                    .build();
+
+            return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/by-month")
+    public ResponseEntity<ApiResponseDTO<List<AppointmentResponseDTO>>> getAppointmentsByMonthAndStatuses(
+        @RequestParam int year,
+        @RequestParam int month,
+        @RequestParam(required = false) List<AppointmentStatus> statuses,
+        HttpServletRequest request) {
+
+            if (statuses == null || statuses.isEmpty()) {
+                statuses = List.of(AppointmentStatus.PENDING, AppointmentStatus.IN_PROGRESS, AppointmentStatus.COMPLETED);
+            }
+
+            List<AppointmentResponseDTO> appointments = appointmentService.getAppointmentsByMonthANDStatuses(year, month, statuses);
+
+            ApiResponseDTO<List<AppointmentResponseDTO>> response = ApiResponseDTO.<List<AppointmentResponseDTO>>builder()
+                    .status("success")
+                    .message("Appointments for the month retrieved successfully")
+                    .data(appointments)
+                    .timestamp(Instant.now())
+                    .path(request.getRequestURI())
+                    .build();
+            return ResponseEntity.ok(response);
+        }
+
     
 
 }
