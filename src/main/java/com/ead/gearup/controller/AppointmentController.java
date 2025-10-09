@@ -160,7 +160,7 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-    
+   
 
     @GetMapping("/filter-by-date")
     public ResponseEntity<ApiResponseDTO<List<AppointmentResponseDTO>>> getAppointmentsByDate(
@@ -203,6 +203,22 @@ public class AppointmentController {
             return ResponseEntity.ok(response);
         }
 
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponseDTO<List<AppointmentResponseDTO>>> searchAppointments(
+        @RequestParam("keyword") String keyword,
+        HttpServletRequest request) {
+
+            List<AppointmentResponseDTO> results = appointmentService.searchAppointments(keyword);
+
+            ApiResponseDTO<List<AppointmentResponseDTO>> response = ApiResponseDTO.<List<AppointmentResponseDTO>>builder()
+                    .status("success")
+                    .message("Search results retrieved successfully")
+                    .data(results)
+                    .timestamp(Instant.now())
+                    .path(request.getRequestURI())
+                    .build();
+            return ResponseEntity.ok(response);
+        }
     
 
 }
