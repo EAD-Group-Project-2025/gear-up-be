@@ -6,8 +6,8 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
-import com.ead.gearup.model.Appointment;
-import com.ead.gearup.repository.AppointmentRepository;
+import com.ead.gearup.dto.appointment.AppointmentSearchResponseDTO;
+import com.ead.gearup.service.AppointmentService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,10 +15,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AppointmentGraphQLController {
 
-    private final AppointmentRepository appointmentRepository;
+    private final AppointmentService appointmentService;
 
     @QueryMapping
-    public List<Appointment> searchAppointmentsByCustomerName(@Argument String name) {
-        return appointmentRepository.findByCustomerUserName(name);
+    public List<AppointmentSearchResponseDTO> searchAppointmentsByCustomerName(@Argument String name) {
+        return appointmentService.searchAppointmentsByCustomerName(name);
     }
 }

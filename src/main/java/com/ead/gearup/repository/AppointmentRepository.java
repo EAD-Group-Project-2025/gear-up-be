@@ -1,5 +1,6 @@
 package com.ead.gearup.repository;
 
+import com.ead.gearup.dto.appointment.AppointmentSearchResponseProjection;
 import com.ead.gearup.model.Appointment;
 
 import org.springframework.data.jpa.repository.Query;
@@ -13,10 +14,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-    @Query("SELECT a FROM Appointment a " +
-            "JOIN FETCH a.customer c " +
-            "JOIN FETCH c.user u " +
-            "WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))")
-    List<Appointment> findByCustomerUserName(@Param("name") String name);
+    @Query(value = "SELECT a.appointment_id AS appointmentId, a.date, a.status, a.notes " +
+            "FROM appointment a " +
+            "JOIN customers c ON a.customer_id = c.customer_id " +
+            "JOIN users u ON c.user_id = u.user_id " +
+            "WHERE u.name ILIKE %:name%", nativeQuery = true)
+    List<AppointmentSearchResponseProjection> findAppointmentSearchResultsNative(@Param("name") String name);
 
 }
