@@ -160,7 +160,20 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-   
+    @GetMapping("/employee")
+    public ResponseEntity<ApiResponseDTO<List<AppointmentResponseDTO>>> getAppointmentsForEmployee (HttpServletRequest request) {
+        List<AppointmentResponseDTO> appointments = appointmentService.getAppointmentsForEmployee();
+
+        ApiResponseDTO<List<AppointmentResponseDTO>> response = ApiResponseDTO.<List<AppointmentResponseDTO>>builder()
+                .status("success")
+                .message("Employee appointments retrieved successfully")
+                .data(appointments)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/filter-by-date")
     public ResponseEntity<ApiResponseDTO<List<AppointmentResponseDTO>>> getAppointmentsByDate(

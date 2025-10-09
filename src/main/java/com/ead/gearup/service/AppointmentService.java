@@ -26,7 +26,9 @@ import com.ead.gearup.util.AppointmentDTOConverter;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +57,7 @@ public class AppointmentService {
         return converter.convertToResponseDto(appointment);
     }
 
-    @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN})
+    @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN, UserRole.EMPLOYEE})
     public AppointmentResponseDTO updateAppointment(Long appointmentId, AppointmentUpdateDTO updateDTO) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found: " + appointmentId));
@@ -79,7 +81,7 @@ public class AppointmentService {
         return converter.convertToResponseDto(updatedAppointment);
     }
 
-    @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN})
+    @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN, UserRole.EMPLOYEE})
     public AppointmentResponseDTO getAppointmentById(Long appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found: " + appointmentId));
@@ -95,7 +97,7 @@ public class AppointmentService {
 
     }
 
-    @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN})
+    @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN, UserRole.EMPLOYEE})
     public List<AppointmentResponseDTO> getAllAppointments() {
         UserRole role = currentUserService.getCurrentUserRole();
 
@@ -128,7 +130,15 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
     }
 
+    @RequiresRole({UserRole.EMPLOYEE, UserRole.ADMIN})
+    public List<AppointmentResponseDTO> getUpcomingAppointmentsForEmployee(Long employeeId) {
+        return appointmentRepository
+                .findByEmployeeEmployeeIdAndDateGreaterThanEqualOrderByDateAsc(employeeId, LocalDate.now())
+                .stream()
+                .map(converter::convertToResponseDto)
+                .collect(Collectors.toList());
+    }
 
-
+    
 
 }
