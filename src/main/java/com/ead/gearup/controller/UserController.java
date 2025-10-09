@@ -52,31 +52,31 @@ public class UserController {
             "Password status retrieved"
         ));
     }
-}
 
-// Simple ApiResponse wrapper class
-class ApiResponse<T> {
-    private String status;
-    private String message;
-    private T data;
-    private String timestamp;
+    // Inner class for API response
+    private static class ApiResponse<T> {
+        private String status;
+        private String message;
+        private T data;
+        private String timestamp;
 
-    public static <T> ApiResponse<T> success(T data, String message) {
-        ApiResponse<T> response = new ApiResponse<>();
-        response.status = "success";
-        response.message = message;
-        response.data = data;
-        response.timestamp = java.time.LocalDateTime.now().toString();
-        return response;
+        public static <T> ApiResponse<T> success(T data, String message) {
+            ApiResponse<T> response = new ApiResponse<>();
+            response.status = "success";
+            response.message = message;
+            response.data = data;
+            response.timestamp = java.time.LocalDateTime.now().toString();
+            return response;
+        }
+
+        // Getters and Setters
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+        public T getData() { return data; }
+        public void setData(T data) { this.data = data; }
+        public String getTimestamp() { return timestamp; }
+        public void setTimestamp(String timestamp) { this.timestamp = timestamp; }
     }
-
-    // Getters and Setters
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
-    public T getData() { return data; }
-    public void setData(T data) { this.data = data; }
-    public String getTimestamp() { return timestamp; }
-    public void setTimestamp(String timestamp) { this.timestamp = timestamp; }
 }
