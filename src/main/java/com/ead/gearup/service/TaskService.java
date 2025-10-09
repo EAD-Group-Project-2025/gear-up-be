@@ -1,6 +1,7 @@
 package com.ead.gearup.service;
 
 import com.ead.gearup.dto.task.TaskUpdateDTO;
+import com.ead.gearup.enums.TaskStatus;
 import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.exception.AppointmentNotFoundException;
 import com.ead.gearup.exception.TaskNotFoundException;
@@ -9,6 +10,7 @@ import com.ead.gearup.model.Appointment;
 import com.ead.gearup.repository.AppointmentRepository;
 import com.ead.gearup.service.auth.CurrentUserService;
 import com.ead.gearup.validation.RequiresRole;
+
 import org.springframework.stereotype.Service;
 
 import com.ead.gearup.dto.task.TaskCreateDTO;
@@ -16,11 +18,15 @@ import com.ead.gearup.dto.task.TaskResponseDTO;
 import com.ead.gearup.model.Task;
 import com.ead.gearup.repository.TaskRepository;
 import com.ead.gearup.util.TaskDTOConverter;
+import com.ead.gearup.model.Employee;
+import com.ead.gearup.exception.UserNotFoundException;
+import com.ead.gearup.repository.EmployeeRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -31,6 +37,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final AppointmentRepository appointmentRepository;
     private final CurrentUserService currentUserService;
+    private final EmployeeRepository employeeRepository;
 
     @RequiresRole({UserRole.EMPLOYEE, UserRole.ADMIN})
     public TaskResponseDTO createTask(TaskCreateDTO taskCreateDTO) {
@@ -136,5 +143,24 @@ public class TaskService {
         taskRepository.delete(task);
     }
 
+    @RequiresRole({UserRole.EMPLOYEE, UserRole.ADMIN})
+    public Map<String, Long> getTaskSummaryForEmployee() {
+        Long employeeId = currentUserService.getCurrentEntityId();
+
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new UserNotFoundException("Employee not found with ID: " + employeeId));
+
+        Long assigned = taskRepository.countByEmployeeAndStatus(employee, TaskStatus.CONFIRMED);
+        Long inProgress = taskRepository.countByEmployeeAndStatus(employee, TaskStatus.IN_PROGRESS);
+        Long completedToday = taskRepository.countCompletedToday(employee);
+
+        return Map.of(
+            "assigned", assigned,
+            "inprogress", inProgress,
+            "completedToday", completedToday
+        );
+
+
+    }
 
 }
