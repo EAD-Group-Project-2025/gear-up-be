@@ -48,6 +48,7 @@ public class EmployeeManagementService {
         employee.setRole(UserRole.EMPLOYEE);
         employee.setIsVerified(true); // Auto-verify employee accounts
         employee.setIsActive(true);
+        employee.setRequiresPasswordChange(true); // Force password change on first login
         employee.setCreatedAt(LocalDateTime.now());
         
         // Set additional employee-specific fields if your User entity has them
