@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 
 import com.ead.gearup.dto.appointment.AppointmentSearchResponseDTO;
 import com.ead.gearup.dto.customer.CustomerSearchResponseDTO;
+import com.ead.gearup.dto.employee.EmployeeSearchResponseDTO;
 import com.ead.gearup.model.Employee;
 import com.ead.gearup.service.AppointmentService;
 import com.ead.gearup.service.CustomerService;
@@ -35,10 +36,10 @@ public class SearchGraphQLController {
         return customerService.searchCustomersByCustomerName(name);
     }
 
-    // @QueryMapping
-    // public List<AppointmentSearchResponseDTO> searchEmployeesByEmployeeName(@Argument String name) {
-    //     return employeeService.searchEmployeesByEmployeeName(name);
-    // }
+    @QueryMapping
+    public List<EmployeeSearchResponseDTO> searchEmployeesByEmployeeName(@Argument String name) {
+        return employeeService.searchEmployeesByEmployeeName(name);
+    }
 
     // @QueryMapping
     // public List<AppointmentSearchResponseDTO> searchTasksByTaskName(@Argument String name) {
