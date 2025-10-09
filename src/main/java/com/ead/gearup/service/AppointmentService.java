@@ -139,7 +139,9 @@ public class AppointmentService {
                         p.getAppointmentId(),
                         p.getDate(),
                         p.getStatus(),
-                        p.getNotes()))
+                        p.getNotes(),
+                        p.getStartTime(),
+                        p.getEndTime()))
                 .collect(Collectors.toList());
     }
 
