@@ -2,6 +2,8 @@ package com.ead.gearup.controller;
 
 import com.ead.gearup.dto.customer.*;
 import com.ead.gearup.dto.response.ApiResponseDTO;
+import com.ead.gearup.dto.vehicle.VehicleCreateDTO;
+import com.ead.gearup.dto.vehicle.VehicleResponseDTO;
 import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.service.CustomerService;
 import com.ead.gearup.validation.RequiresRole;
@@ -173,6 +175,66 @@ public class CustomerController {
                 .status("success")
                 .message("Customer dashboard retrieved successfully")
                 .data(dashboard)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    //Customer/Vehicles
+    @GetMapping("/{customerId}/vehicles")
+    @Operation(summary = "Get all vehicles of a customer")
+    public ResponseEntity<ApiResponseDTO<List<VehicleResponseDTO>>> getCustomerVehicles(
+            @PathVariable Long customerId,
+            HttpServletRequest request) {
+
+        List<VehicleResponseDTO> vehicles = customerService.getCustomerVehicles(customerId);
+
+        ApiResponseDTO<List<VehicleResponseDTO>> response = ApiResponseDTO.<List<VehicleResponseDTO>>builder()
+                .status("success")
+                .message("Vehicles retrieved successfully")
+                .data(vehicles)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{customerId}/vehicles")
+    @Operation(summary = "Add a new vehicle for the customer")
+    public ResponseEntity<ApiResponseDTO<VehicleResponseDTO>> addVehicle(
+            @PathVariable Long customerId,
+            @Valid @RequestBody VehicleCreateDTO dto,
+            HttpServletRequest request) {
+
+        VehicleResponseDTO createdVehicle = customerService.addVehicle(customerId, dto);
+
+        ApiResponseDTO<VehicleResponseDTO> response = ApiResponseDTO.<VehicleResponseDTO>builder()
+                .status("success")
+                .message("Vehicle added successfully")
+                .data(createdVehicle)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @DeleteMapping("/{customerId}/vehicles/{vehicleId}")
+    @Operation(summary = "Delete a vehicle by ID")
+    public ResponseEntity<ApiResponseDTO<Object>> deleteVehicle(
+            @PathVariable Long customerId,
+            @PathVariable Long vehicleId,
+            HttpServletRequest request) {
+
+        customerService.deleteVehicle(customerId, vehicleId);
+
+        ApiResponseDTO<Object> response = ApiResponseDTO.builder()
+                .status("success")
+                .message("Vehicle deleted successfully")
+                .data(null)
                 .timestamp(Instant.now())
                 .path(request.getRequestURI())
                 .build();

@@ -1,12 +1,15 @@
 package com.ead.gearup.service;
 
 import com.ead.gearup.dto.customer.*;
+import com.ead.gearup.dto.vehicle.VehicleCreateDTO;
+import com.ead.gearup.dto.vehicle.VehicleResponseDTO;
 import com.ead.gearup.enums.AppointmentStatus;
 import com.ead.gearup.exception.CustomerNotFoundException;
 import com.ead.gearup.exception.UnauthorizedCustomerAccessException;
 import com.ead.gearup.model.Customer;
 import com.ead.gearup.model.User;
 import com.ead.gearup.enums.UserRole;
+import com.ead.gearup.model.Vehicle;
 import com.ead.gearup.repository.CustomerRepository;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.auth.CurrentUserService;
@@ -244,6 +247,65 @@ public class CustomerService {
                 .recentActivities(activities)
                 .vehicles(vehicles)
                 .build();
+    }
+
+    //Customer/Vehicle
+    @Transactional(readOnly = true)
+    public List<VehicleResponseDTO> getCustomerVehicles(Long customerId) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + customerId));
+
+        return customer.getVehicles().stream()
+                .map(v -> new VehicleResponseDTO(
+                        v.getVehicleId(),
+                        v.getVin(),
+                        v.getLicensePlate(),
+                        v.getYear(),
+                        v.getModel(),
+                        v.getMake()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public VehicleResponseDTO addVehicle(Long customerId, VehicleCreateDTO dto) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + customerId));
+
+        Vehicle vehicle = Vehicle.builder()
+                .vin(dto.getVin())
+                .licensePlate(dto.getLicensePlate())
+                .year(dto.getYear())
+                .model(dto.getModel())
+                .make(dto.getMake())
+                .customer(customer)
+                .build();
+
+        customer.getVehicles().add(vehicle);
+        customerRepository.save(customer);
+
+        return new VehicleResponseDTO(
+                vehicle.getVehicleId(),
+                vehicle.getVin(),
+                vehicle.getLicensePlate(),
+                vehicle.getYear(),
+                vehicle.getModel(),
+                vehicle.getMake()
+        );
+    }
+
+    @Transactional
+    public void deleteVehicle(Long customerId, Long vehicleId) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + customerId));
+
+        Vehicle vehicleToDelete = customer.getVehicles().stream()
+                .filter(v -> v.getVehicleId().equals(vehicleId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with id: " + vehicleId));
+
+        customer.getVehicles().remove(vehicleToDelete);
+        customerRepository.save(customer);
     }
 
 }
