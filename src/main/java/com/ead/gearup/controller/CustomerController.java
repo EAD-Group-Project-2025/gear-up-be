@@ -184,61 +184,6 @@ public class CustomerController {
         return ResponseEntity.ok(response);
     }
 
-    //Customer/Vehicles
-    @GetMapping("/vehicles")
-    @Operation(summary = "Get all vehicles for the logged-in customer")
-    @RequiresRole({UserRole.CUSTOMER})
-    public ResponseEntity<ApiResponseDTO<List<VehicleResponseDTO>>> getCustomerVehicles(HttpServletRequest request) {
-        List<VehicleResponseDTO> vehicles = vehicleService.getAllVehicles(); // 🚀 reuse logic
-        ApiResponseDTO<List<VehicleResponseDTO>> response = ApiResponseDTO.<List<VehicleResponseDTO>>builder()
-                .status("success")
-                .message("Vehicles retrieved successfully")
-                .data(vehicles)
-                .timestamp(Instant.now())
-                .path(request.getRequestURI())
-                .build();
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/vehicles")
-    @Operation(summary = "Add a new vehicle for the logged-in customer")
-    @RequiresRole({UserRole.CUSTOMER})
-    public ResponseEntity<ApiResponseDTO<VehicleResponseDTO>> addVehicle(
-            @Valid @RequestBody VehicleCreateDTO dto,
-            HttpServletRequest request) {
-
-        VehicleResponseDTO created = vehicleService.createVehicle(dto); // 🚀 reuse existing logic
-
-        ApiResponseDTO<VehicleResponseDTO> response = ApiResponseDTO.<VehicleResponseDTO>builder()
-                .status("success")
-                .message("Vehicle added successfully")
-                .data(created)
-                .timestamp(Instant.now())
-                .path(request.getRequestURI())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @DeleteMapping("/vehicles/{vehicleId}")
-    @Operation(summary = "Delete a vehicle by ID")
-    @RequiresRole({UserRole.CUSTOMER})
-    public ResponseEntity<ApiResponseDTO<Object>> deleteVehicle(
-            @PathVariable Long vehicleId,
-            HttpServletRequest request) {
-
-        vehicleService.deleteVehicle(vehicleId); // 🚀 reuse logic
-
-        ApiResponseDTO<Object> response = ApiResponseDTO.builder()
-                .status("success")
-                .message("Vehicle deleted successfully")
-                .data(null)
-                .timestamp(Instant.now())
-                .path(request.getRequestURI())
-                .build();
-
-        return ResponseEntity.ok(response);
-    }
 }
 
 
