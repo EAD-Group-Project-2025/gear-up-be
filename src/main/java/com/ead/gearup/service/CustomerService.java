@@ -1,5 +1,6 @@
 package com.ead.gearup.service;
 
+import com.ead.gearup.dto.customer.CustomerHeaderDTO;
 import com.ead.gearup.dto.customer.CustomerRequestDTO;
 import com.ead.gearup.dto.customer.CustomerResponseDTO;
 import com.ead.gearup.dto.customer.CustomerUpdateDTO;
@@ -18,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -114,4 +117,42 @@ public class CustomerService {
 
         customerRepository.delete(customer);
     }
+
+    @Transactional(readOnly = true)
+    public CustomerHeaderDTO getHeaderInfo(Long id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + id));
+
+        return CustomerHeaderDTO.builder()
+                .name(customer.getUser().getName())
+                .profileImage(customer.getProfileImage())
+                .build();
+    }
+
+//    @Transactional(readOnly = true)
+//    public List<NotificationDTO> getNotifications(Long id) {
+//        Customer customer = customerRepository.findById(id)
+//                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + id));
+//
+//        List<Notification> notifications = notificationRepository.findByCustomerOrderByCreatedAtDesc(customer);
+//
+//        return notifications.stream()
+//                .map(n -> NotificationDTO.builder()
+//                        .id(n.getId())
+//                        .message(n.getMessage())
+//                        .type(n.getType())
+//                        .time(formatTimeAgo(n.getCreatedAt()))
+//                        .build())
+//                .collect(Collectors.toList());
+//    }
+
+    // helper
+    private String formatTimeAgo(LocalDateTime dateTime) {
+        Duration duration = Duration.between(dateTime, LocalDateTime.now());
+        if (duration.toMinutes() < 60) return duration.toMinutes() + " minutes ago";
+        else if (duration.toHours() < 24) return duration.toHours() + " hours ago";
+        else return duration.toDays() + " days ago";
+    }
+
+
 }

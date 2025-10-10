@@ -1,5 +1,6 @@
 package com.ead.gearup.controller;
 
+import com.ead.gearup.dto.customer.CustomerHeaderDTO;
 import com.ead.gearup.dto.customer.CustomerRequestDTO;
 import com.ead.gearup.dto.customer.CustomerResponseDTO;
 import com.ead.gearup.dto.customer.CustomerUpdateDTO;
@@ -121,4 +122,45 @@ public class CustomerController {
 
         return ResponseEntity.ok(response);
     }
+
+    //Header/GetProfile
+    @GetMapping("/{id}/header")
+    @Operation(summary = "Get customer header info (name & profile image)")
+    public ResponseEntity<ApiResponseDTO<CustomerHeaderDTO>> getHeaderInfo(
+            @PathVariable Long id,
+            HttpServletRequest request) {
+
+        CustomerHeaderDTO header = customerService.getHeaderInfo(id);
+
+        ApiResponseDTO<CustomerHeaderDTO> response = ApiResponseDTO.<CustomerHeaderDTO>builder()
+                .status("success")
+                .message("Customer header info retrieved successfully")
+                .data(header)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+      //Header/Get Notification
+//    @GetMapping("/{id}/notifications")
+//    @Operation(summary = "Get notifications for a customer")
+//    public ResponseEntity<ApiResponseDTO<List<NotificationDTO>>> getNotifications(
+//            @PathVariable Long id,
+//            HttpServletRequest request) {
+//
+//        List<NotificationDTO> notifications = customerService.getNotifications(id);
+//
+//        ApiResponseDTO<List<NotificationDTO>> response = ApiResponseDTO.<List<NotificationDTO>>builder()
+//                .status("success")
+//                .message("Customer notifications retrieved successfully")
+//                .data(notifications)
+//                .timestamp(Instant.now())
+//                .path(request.getRequestURI())
+//                .build();
+//
+//        return ResponseEntity.ok(response);
+//    }
+
 }
