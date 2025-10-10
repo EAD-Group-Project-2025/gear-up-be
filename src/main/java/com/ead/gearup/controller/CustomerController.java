@@ -2,8 +2,6 @@ package com.ead.gearup.controller;
 
 import com.ead.gearup.dto.customer.*;
 import com.ead.gearup.dto.response.ApiResponseDTO;
-import com.ead.gearup.dto.vehicle.VehicleCreateDTO;
-import com.ead.gearup.dto.vehicle.VehicleResponseDTO;
 import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.service.CustomerService;
 import com.ead.gearup.service.VehicleService;
@@ -126,6 +124,7 @@ public class CustomerController {
 
     //Header/GetProfile
     @GetMapping("/{id}/header")
+    @RequiresRole(UserRole.CUSTOMER)
     @Operation(summary = "Get customer header info (name & profile image)")
     public ResponseEntity<ApiResponseDTO<CustomerHeaderDTO>> getHeaderInfo(
             @PathVariable Long id,
@@ -166,6 +165,7 @@ public class CustomerController {
 
     //Customer Dashboard
     @GetMapping("/{id}/dashboard")
+    @RequiresRole(UserRole.CUSTOMER)
     @Operation(summary = "Get full customer dashboard details")
     public ResponseEntity<ApiResponseDTO<CustomerDashboardDTO>> getDashboard(
             @PathVariable Long id,
