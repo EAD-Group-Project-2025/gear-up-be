@@ -1,9 +1,6 @@
 package com.ead.gearup.controller;
 
-import com.ead.gearup.dto.customer.CustomerHeaderDTO;
-import com.ead.gearup.dto.customer.CustomerRequestDTO;
-import com.ead.gearup.dto.customer.CustomerResponseDTO;
-import com.ead.gearup.dto.customer.CustomerUpdateDTO;
+import com.ead.gearup.dto.customer.*;
 import com.ead.gearup.dto.response.ApiResponseDTO;
 import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.service.CustomerService;
@@ -162,5 +159,26 @@ public class CustomerController {
 //
 //        return ResponseEntity.ok(response);
 //    }
+
+    //Customer Dashboard
+    @GetMapping("/{id}/dashboard")
+    @Operation(summary = "Get full customer dashboard details")
+    public ResponseEntity<ApiResponseDTO<CustomerDashboardDTO>> getDashboard(
+            @PathVariable Long id,
+            HttpServletRequest request) {
+
+        CustomerDashboardDTO dashboard = customerService.getDashboard(id);
+
+        ApiResponseDTO<CustomerDashboardDTO> response = ApiResponseDTO.<CustomerDashboardDTO>builder()
+                .status("success")
+                .message("Customer dashboard retrieved successfully")
+                .data(dashboard)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
 
 }
