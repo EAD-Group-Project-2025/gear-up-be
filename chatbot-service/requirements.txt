@@ -19,8 +19,8 @@ faiss-cpu==1.9.0.post1
 # Embeddings
 sentence-transformers==2.2.2
 
-# Database
-asyncpg==0.29.0
+# Database - Using psycopg2 for Python 3.13 compatibility
+psycopg2-binary==2.9.9
 sqlalchemy==2.0.23
 alembic==1.13.1
 

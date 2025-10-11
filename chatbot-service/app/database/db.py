@@ -14,13 +14,30 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL not set in environment")
 
-engine = create_async_engine(DATABASE_URL, echo=False, future=True)
-async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+# Lazy initialization of engine
+_engine = None
+
+def get_engine():
+    """Get or create the database engine"""
+    global _engine
+    if _engine is None:
+        _engine = create_async_engine(DATABASE_URL, echo=False, future=True)
+    return _engine
+
+async_session = None
+
+def get_async_session():
+    """Get or create the async session maker"""
+    global async_session
+    if async_session is None:
+        async_session = sessionmaker(get_engine(), class_=AsyncSession, expire_on_commit=False)
+    return async_session
 
 
 async def get_db_connection():
     """Get database session"""
-    async with async_session() as session:
+    session_maker = get_async_session()
+    async with session_maker() as session:
         yield session
 
 
