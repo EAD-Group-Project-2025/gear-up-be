@@ -81,6 +81,7 @@ public class EmployeeService {
         return converter.convertToResponseDto(employee);
     }
 
+    @Transactional
     public EmployeeResponseDTO updateEmployee(Long id, UpdateEmployeeDTO updateEmployeeDTO) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Invalid employee ID");
