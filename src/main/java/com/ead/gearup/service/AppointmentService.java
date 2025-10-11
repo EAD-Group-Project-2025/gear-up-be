@@ -139,6 +139,45 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
-    
+    @RequiresRole({UserRole.EMPLOYEE})
+    public List<AppointmentResponseDTO> getAppointmentsForEmployee(){
+        Long employeeId = currentUserService.getCurrentEntityId();
+        return appointmentRepository
+                .findByEmployeeEmployeeId(employeeId)
+                .stream()
+                .map(converter::convertToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+
+    @RequiresRole({UserRole.EMPLOYEE})
+    public List<AppointmentResponseDTO> getAppointmentsByDate(Long employeeId, LocalDate date) {
+        return appointmentRepository
+                .findByEmployeeEmployeeIdAndDate(employeeId, date)
+                .stream()
+                .map(converter::convertToResponseDto)
+                .toList();
+    }
+
+    @RequiresRole({UserRole.EMPLOYEE})
+    public List<AppointmentResponseDTO> getAppointmentsByMonthANDStatuses(int year, int month, List<AppointmentStatus> statuses) {
+        Long employeeId = currentUserService.getCurrentEntityId();
+        List<Appointment> appointments = appointmentRepository
+                .findAppointmentsByEmployeeAndMonthAndStatus(employeeId, year, month, statuses);
+        return appointments.stream()
+                .map(converter::convertToResponseDto)
+                .toList();
+    }
+
+    @RequiresRole({UserRole.EMPLOYEE})
+    public List<AppointmentResponseDTO> searchAppointments(String keyword) {
+        Long employeeId = currentUserService.getCurrentEntityId();
+        List<Appointment> appointments = appointmentRepository
+                .searchAppointmentsByCustomerNameOrTask(employeeId, keyword);
+
+        return appointments.stream()
+                .map(converter::convertToResponseDto)
+                .toList();
+    }
 
 }
