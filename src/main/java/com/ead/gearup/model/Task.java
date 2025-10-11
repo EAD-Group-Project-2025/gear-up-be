@@ -68,4 +68,9 @@ public class Task {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = false)
+    private Employee employee;
+
 }
