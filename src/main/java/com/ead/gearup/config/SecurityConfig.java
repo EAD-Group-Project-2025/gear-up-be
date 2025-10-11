@@ -53,10 +53,12 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
+                                "/swagger",
                                 "/api/v1/auth/**",
                                 "/api/v1/public/**")
                         .permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/chat/**").authenticated() // Chat requires authentication
                         // .requestMatchers("/api/v1/customers/**").hasRole("CUSTOMER")
                         // .requestMatchers("/api/v1/employees/**").hasRole("EMPLOYEE")
                         .anyRequest().authenticated())
