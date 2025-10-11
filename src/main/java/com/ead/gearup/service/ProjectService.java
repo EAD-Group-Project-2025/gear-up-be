@@ -14,7 +14,9 @@ import com.ead.gearup.util.ProjectDTOConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -124,5 +126,19 @@ public class ProjectService {
                 .orElseThrow(() -> new ProjectNotFoundException("Project not found: " + projectId));
 
         projectRepository.delete(project);
+    }
+
+    @RequiresRole({UserRole.EMPLOYEE, UserRole.ADMIN})
+    public Map<String, Long> getProjectCountByStatus(Long employeeId) {
+        List<Object[]> results = projectRepository.countProjectsByStatusForEmployee(employeeId);
+        Map<String, Long> response = new HashMap<>();
+    
+        for (Object[] row : results) {
+            String status = row[0].toString();
+            Long count = (Long) row[1];
+            response.put(status, count);
+        }
+    
+        return response;
     }
 }
