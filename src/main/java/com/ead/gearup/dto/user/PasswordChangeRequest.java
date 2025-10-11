@@ -11,10 +11,10 @@ public class PasswordChangeRequest {
     @NotBlank(message = "Current password is required")
     private String currentPassword;
 
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "New password is required")
     @Size(min = 8, message = "Password must be at least 8 characters long")
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).*$", message = "Password must contain uppercase, lowercase, number, and special character")
-    @Schema(example = "string")
+    @Schema(example = "MyPassword123!")
     private String newPassword;
 
     @NotBlank(message = "Password confirmation is required")
