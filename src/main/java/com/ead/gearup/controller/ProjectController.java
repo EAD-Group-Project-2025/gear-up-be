@@ -5,11 +5,14 @@ import com.ead.gearup.dto.project.UpdateProjectDTO;
 import com.ead.gearup.dto.response.ApiResponseDTO;
 import com.ead.gearup.dto.project.ProjectResponseDTO;
 import com.ead.gearup.service.ProjectService;
+import com.ead.gearup.service.auth.CurrentUserService;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +28,7 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final CurrentUserService currentUserService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseDTO<ProjectResponseDTO>> createProject(
@@ -111,5 +115,16 @@ public class ProjectController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+    }
+
+    @GetMapping("/status-count")
+    public ResponseEntity<?> getProjectCountByStatus() {
+        Long employeeId = currentUserService.getCurrentEntityId();
+        Map<String, Long> result = projectService.getProjectCountByStatus(employeeId);
+        return ResponseEntity.ok(Map.of(
+                "status", "success",
+                "message", "Project status count retrieved successfully",
+                "data", result
+        ));
     }
 }
