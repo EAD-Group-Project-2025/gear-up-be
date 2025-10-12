@@ -19,4 +19,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
            "GROUP BY p.status")
     List<Object[]> countProjectsByStatusForEmployee(@Param("employeeId") Long employeeId);
 
+    List<Project> findByAssignedEmployeesEmployeeId(Long employeeId);
+
 }

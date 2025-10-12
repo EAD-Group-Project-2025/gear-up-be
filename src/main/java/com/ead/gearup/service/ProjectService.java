@@ -3,6 +3,7 @@ package com.ead.gearup.service;
 import com.ead.gearup.dto.project.CreateProjectDTO;
 import com.ead.gearup.dto.project.UpdateProjectDTO;
 import com.ead.gearup.dto.project.ProjectResponseDTO;
+import com.ead.gearup.dto.employee.EmployeeProjectResponseDTO;
 import com.ead.gearup.enums.ProjectStatus;
 import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.exception.*;
@@ -140,5 +141,18 @@ public class ProjectService {
         }
     
         return response;
+    }
+
+    @RequiresRole({UserRole.EMPLOYEE, UserRole.ADMIN})
+    public List<EmployeeProjectResponseDTO> getAssignedProjectsForCurrentEmployee() {
+        Long employeeId = currentUserService.getCurrentUserId();
+        List<Project> projects = projectRepository.findByAssignedEmployeesEmployeeId(employeeId);
+
+        return projects.stream()
+                .map(p -> new EmployeeProjectResponseDTO(
+                        p.getProjectId(),
+                        p.getName()
+                ))
+                .toList();
     }
 }

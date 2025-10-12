@@ -160,6 +160,7 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    // Dashboard - upcoming appointments list
     @GetMapping("/employee")
     public ResponseEntity<ApiResponseDTO<List<AppointmentResponseDTO>>> getAppointmentsForEmployee (HttpServletRequest request) {
         List<AppointmentResponseDTO> appointments = appointmentService.getAppointmentsForEmployee();

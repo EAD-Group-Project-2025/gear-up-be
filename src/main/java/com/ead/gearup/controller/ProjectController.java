@@ -1,5 +1,6 @@
 package com.ead.gearup.controller;
 
+import com.ead.gearup.dto.employee.EmployeeProjectResponseDTO;
 import com.ead.gearup.dto.project.CreateProjectDTO;
 import com.ead.gearup.dto.project.UpdateProjectDTO;
 import com.ead.gearup.dto.response.ApiResponseDTO;
@@ -126,5 +127,21 @@ public class ProjectController {
                 "message", "Project status count retrieved successfully",
                 "data", result
         ));
+    }
+
+    // Employee's assigned projects
+    @GetMapping("/my-assigned")
+    public ResponseEntity<ApiResponseDTO<List<EmployeeProjectResponseDTO>>> getMyAssignedProjects(HttpServletRequest request) {
+        List<EmployeeProjectResponseDTO> projects = projectService.getAssignedProjectsForCurrentEmployee();
+
+        ApiResponseDTO<List<EmployeeProjectResponseDTO>> response = ApiResponseDTO.<List<EmployeeProjectResponseDTO>>builder()
+                .status("success")
+                .message("Assigned projects retrieved successfully")
+                .data(projects)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 }

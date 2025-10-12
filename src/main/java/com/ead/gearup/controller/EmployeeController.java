@@ -124,6 +124,7 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
+    // Dashboard
     @GetMapping("/task-summary")
     public ResponseEntity<ApiResponseDTO<Map<String, Long>>> getTaskSummaryForEmployee(HttpServletRequest request) {
         Map<String, Long> taskSummary = taskService.getTaskSummaryForEmployee();
