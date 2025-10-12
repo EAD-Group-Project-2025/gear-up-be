@@ -160,7 +160,7 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-    // Dashboard - upcoming appointments list
+    // Dashboard - employee's appointments list
     @GetMapping("/employee")
     public ResponseEntity<ApiResponseDTO<List<AppointmentResponseDTO>>> getAppointmentsForEmployee (HttpServletRequest request) {
         List<AppointmentResponseDTO> appointments = appointmentService.getAppointmentsForEmployee();
@@ -233,6 +233,20 @@ public class AppointmentController {
                     .build();
             return ResponseEntity.ok(response);
         }
+
+    // Employee's upcoming appointments
+    @GetMapping("/employee/upcoming")
+    public ResponseEntity<ApiResponseDTO<List<AppointmentResponseDTO>>> getUpcomingAppointmentsForEmployee(HttpServletRequest request) {
+        List<AppointmentResponseDTO> appointments = appointmentService.getUpcomingAppointmentsForEmployee();
+        ApiResponseDTO<List<AppointmentResponseDTO>> response = ApiResponseDTO.<List<AppointmentResponseDTO>>builder()
+                .status("success")
+                .message("Upcoming appointments retrieved successfully")
+                .data(appointments)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.ok(response);
+    }
     
 
 }

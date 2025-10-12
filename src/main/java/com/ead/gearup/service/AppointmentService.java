@@ -180,4 +180,14 @@ public class AppointmentService {
                 .toList();
     }
 
+    @RequiresRole({UserRole.EMPLOYEE})
+    public List<AppointmentResponseDTO> getUpcomingAppointmentsForEmployee(){
+        Long employeeId = currentUserService.getCurrentEntityId();
+        return appointmentRepository
+                .findByEmployeeEmployeeIdAndStatusAndDateAfter(employeeId, AppointmentStatus.CONFIRMED, LocalDate.now())
+                .stream()
+                 .map(converter::convertToResponseDto)
+                 .collect(Collectors.toList());
+    }
+
 }

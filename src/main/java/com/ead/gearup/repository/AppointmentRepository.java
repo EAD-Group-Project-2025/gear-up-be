@@ -47,4 +47,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("employeeId") Long employeeId,
             @Param("keyword") String keyword
         );
+
+    List<Appointment> findByEmployeeEmployeeIdAndStatusAndDateAfter(Long employeeId, AppointmentStatus status, LocalDate date);
 }
