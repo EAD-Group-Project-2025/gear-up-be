@@ -17,6 +17,7 @@ import com.ead.gearup.util.ProjectDTOConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,11 +166,22 @@ public class ProjectService {
         Project project = projectRepository.findByProjectIdAndAssignedEmployeesEmployeeId(projectId, employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found or not assigned to you: " + projectId));
 
+        LocalDate startDate = project.getStartDate();
+        LocalDate endDate = project.getEndDate();
+        Long completionDays = null;
+
+        if(startDate != null && endDate != null) {
+            completionDays = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
+        }
+                
+
         return new EmployeeProjectDetailResponseDTO(
                 project.getCustomer().getUser().getName(),
                 project.getVehicle().getModel(),
                 project.getEndDate(),
-                project.getStatus()
+                project.getStartDate(),
+                project.getStatus(),
+                completionDays
         );
     }
 }

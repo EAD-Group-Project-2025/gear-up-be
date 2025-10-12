@@ -15,6 +15,8 @@ public class EmployeeProjectDetailResponseDTO {
     private String customerName;
     private String vehicleModel;
     private LocalDate endDate;
+    private LocalDate startDate;
     private ProjectStatus status;
+    private Long completionDays;
     
 }
