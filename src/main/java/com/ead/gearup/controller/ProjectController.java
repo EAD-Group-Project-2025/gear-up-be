@@ -5,6 +5,7 @@ import com.ead.gearup.dto.project.CreateProjectDTO;
 import com.ead.gearup.dto.project.UpdateProjectDTO;
 import com.ead.gearup.dto.response.ApiResponseDTO;
 import com.ead.gearup.dto.project.ProjectResponseDTO;
+import com.ead.gearup.dto.employee.EmployeeProjectDetailResponseDTO;
 import com.ead.gearup.service.ProjectService;
 import com.ead.gearup.service.auth.CurrentUserService;
 
@@ -138,6 +139,24 @@ public class ProjectController {
                 .status("success")
                 .message("Assigned projects retrieved successfully")
                 .data(projects)
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/my-assigned/{projectId}")
+    public ResponseEntity<ApiResponseDTO<EmployeeProjectDetailResponseDTO>> getMyAssignedProjectDetail(
+            @PathVariable Long projectId,
+            HttpServletRequest request
+    ) {
+        EmployeeProjectDetailResponseDTO projectDetail = projectService.getAssignedProjectDetail(projectId);
+
+        ApiResponseDTO<EmployeeProjectDetailResponseDTO> response = ApiResponseDTO.<EmployeeProjectDetailResponseDTO>builder()
+                .status("success")
+                .message("Assigned project detail retrieved successfully")
+                .data(projectDetail)
                 .timestamp(Instant.now())
                 .path(request.getRequestURI())
                 .build();

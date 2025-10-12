@@ -3,6 +3,7 @@ package com.ead.gearup.repository;
 import com.ead.gearup.model.Project;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,5 +21,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Object[]> countProjectsByStatusForEmployee(@Param("employeeId") Long employeeId);
 
     List<Project> findByAssignedEmployeesEmployeeId(Long employeeId);
+
+    Optional<Project> findByProjectIdAndAssignedEmployeesEmployeeId(Long projectId, Long employeeId);
 
 }

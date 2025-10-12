@@ -3,6 +3,7 @@ package com.ead.gearup.service;
 import com.ead.gearup.dto.project.CreateProjectDTO;
 import com.ead.gearup.dto.project.UpdateProjectDTO;
 import com.ead.gearup.dto.project.ProjectResponseDTO;
+import com.ead.gearup.dto.employee.EmployeeProjectDetailResponseDTO;
 import com.ead.gearup.dto.employee.EmployeeProjectResponseDTO;
 import com.ead.gearup.enums.ProjectStatus;
 import com.ead.gearup.enums.UserRole;
@@ -11,6 +12,7 @@ import com.ead.gearup.model.*;
 import com.ead.gearup.repository.*;
 import com.ead.gearup.service.auth.CurrentUserService;
 import com.ead.gearup.validation.RequiresRole;
+
 import com.ead.gearup.util.ProjectDTOConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -154,5 +156,20 @@ public class ProjectService {
                         p.getName()
                 ))
                 .toList();
+    }
+
+    @RequiresRole({UserRole.EMPLOYEE, UserRole.ADMIN})
+    public EmployeeProjectDetailResponseDTO getAssignedProjectDetail(Long projectId) {
+        Long employeeId = currentUserService.getCurrentUserId();
+
+        Project project = projectRepository.findByProjectIdAndAssignedEmployeesEmployeeId(projectId, employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found or not assigned to you: " + projectId));
+
+        return new EmployeeProjectDetailResponseDTO(
+                project.getCustomer().getUser().getName(),
+                project.getVehicle().getModel(),
+                project.getEndDate(),
+                project.getStatus()
+        );
     }
 }
