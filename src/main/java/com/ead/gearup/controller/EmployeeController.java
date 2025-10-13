@@ -140,4 +140,19 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponseDTO<EmployeeResponseDTO>> getCurrentEmployee(HttpServletRequest request) {
+        EmployeeResponseDTO currentEmployee = employeeService.getCurrentEmployee();
+
+        ApiResponseDTO<EmployeeResponseDTO> response = ApiResponseDTO.<EmployeeResponseDTO>builder()
+                .status("success")
+                .message("Current employee retrieved successfully")
+                .timestamp(Instant.now())
+                .path(request.getRequestURI())
+                .data(currentEmployee)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
 }
