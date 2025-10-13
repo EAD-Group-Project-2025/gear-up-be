@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import com.ead.gearup.dto.appointment.AppointmentCreateDTO;
 import com.ead.gearup.dto.appointment.AppointmentResponseDTO;
 import com.ead.gearup.dto.appointment.AppointmentUpdateDTO;
+import com.ead.gearup.dto.employee.EmployeeAvailableSlotsDTO;
 import com.ead.gearup.dto.response.ApiResponseDTO;
 import com.ead.gearup.enums.AppointmentStatus;
 import com.ead.gearup.service.AppointmentService;
@@ -81,6 +82,7 @@ public class AppointmentController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+    
 
     @PatchMapping(value = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseDTO<AppointmentResponseDTO>> updateAppointment(@PathVariable Long id,
@@ -247,6 +249,20 @@ public class AppointmentController {
                 .build();
         return ResponseEntity.ok(response);
     }
-    
 
+    @GetMapping("/employee/available-slots")
+    public ResponseEntity<ApiResponseDTO<List<EmployeeAvailableSlotsDTO>>> getEmployeeAvailableSlots(
+        @RequestParam("date") LocalDate date,
+        HttpServletRequest request) {
+            List<EmployeeAvailableSlotsDTO> slots = appointmentService.getAvailableSlotsForEmployee(date);
+            ApiResponseDTO<List<EmployeeAvailableSlotsDTO>> response = ApiResponseDTO.<List<EmployeeAvailableSlotsDTO>>builder()
+                    .status("success")
+                    .message("Available slots retrieved successfully")
+                    .data(slots)
+                    .timestamp(Instant.now())
+                    .path(request.getRequestURI())
+                    .build();
+            return ResponseEntity.ok(response);    
+
+    }
 }

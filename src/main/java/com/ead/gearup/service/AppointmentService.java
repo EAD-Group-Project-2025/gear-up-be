@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.ead.gearup.dto.appointment.AppointmentCreateDTO;
 import com.ead.gearup.dto.appointment.AppointmentResponseDTO;
 import com.ead.gearup.dto.appointment.AppointmentUpdateDTO;
+import com.ead.gearup.dto.employee.EmployeeAvailableSlotsDTO;
 import com.ead.gearup.exception.AppointmentNotFoundException;
 import com.ead.gearup.exception.CustomerNotFoundException;
 import com.ead.gearup.exception.VehicleNotFoundException;
@@ -27,6 +28,8 @@ import com.ead.gearup.util.AppointmentDTOConverter;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -188,6 +191,34 @@ public class AppointmentService {
                 .stream()
                  .map(converter::convertToResponseDto)
                  .collect(Collectors.toList());
+    }
+
+    @RequiresRole({UserRole.EMPLOYEE})
+    public List<EmployeeAvailableSlotsDTO> getAvailableSlotsForEmployee(LocalDate date){
+
+        // Get upcoming appointments for current employee
+        List<AppointmentResponseDTO> appointments = getUpcomingAppointmentsForEmployee();
+
+        // Filter appointments for the given date
+        List<AppointmentResponseDTO> appointmentsForDate = appointments.stream()
+                .filter(a -> a.getDate().equals(date))
+                .toList();
+
+        // Generate all slots between 8 AM and 6 PM
+        List<LocalTime> workingHours = new ArrayList<>();
+        for(int hour = 8; hour < 19; hour++){
+            workingHours.add(LocalTime.of(hour, 0));
+        }
+
+        // Remove slots that are booked in confiremed appointments
+        List<LocalTime> bookedSlots = appointmentsForDate.stream()
+                .filter(a -> "CONFIRMED".equalsIgnoreCase(a.getStatus()))
+                .map(AppointmentResponseDTO::getStartTime)
+                .toList();
+
+        workingHours.removeAll(bookedSlots);
+
+        return List.of(new EmployeeAvailableSlotsDTO(date, workingHours));
     }
 
 }
