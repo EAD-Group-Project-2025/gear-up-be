@@ -13,6 +13,7 @@ import com.ead.gearup.validation.RequiresRole;
 
 import org.springframework.stereotype.Service;
 
+import com.ead.gearup.dto.task.EmployeeRecentActivityDTO;
 import com.ead.gearup.dto.task.TaskCreateDTO;
 import com.ead.gearup.dto.task.TaskResponseDTO;
 import com.ead.gearup.model.Task;
@@ -161,6 +162,26 @@ public class TaskService {
         );
 
 
+    }
+    
+    @RequiresRole({UserRole.EMPLOYEE})
+    public List<EmployeeRecentActivityDTO> getRecentActivitiesForCurrentEmployee(){
+        Long employeeId = currentUserService.getCurrentEntityId();
+
+        //Get all tasks for this employee
+        List<Task> tasks = employeeRepository.findById(employeeId)
+                .orElseThrow(()-> new UserNotFoundException("Employee not found with ID: "+ employeeId))
+                .getTasks();
+
+        // Filter in-progress tasks
+        List<String> taskNames = tasks.stream()
+                .filter(t->t.getStatus() == TaskStatus.IN_PROGRESS)
+                .map(Task::getName)
+                .toList();
+
+        return taskNames.stream()
+                .map(name -> new EmployeeRecentActivityDTO(name))
+                .toList();
     }
 
 }
