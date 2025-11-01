@@ -83,7 +83,7 @@ public class AuthService {
         emailVerificationService.sendVerificationEmail(user);
 
         // Return created user info (without password)
-        return new UserResponseDTO(user.getEmail(), user.getName());
+        return new UserResponseDTO(user.getEmail(), user.getName(), user.getRole(), user.getIsVerified());
     }
 
     public boolean verifyEmailToken(String token) {

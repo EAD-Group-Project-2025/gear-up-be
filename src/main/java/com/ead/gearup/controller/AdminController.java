@@ -168,7 +168,9 @@ public class AdminController {
         // Create response
         UserResponseDTO userResponse = new UserResponseDTO(
                 savedAdmin.getEmail(),
-                savedAdmin.getName()
+                savedAdmin.getName(),
+                savedAdmin.getRole(),
+                savedAdmin.getIsVerified()
         );
 
         ApiResponseDTO<UserResponseDTO> response = ApiResponseDTO.<UserResponseDTO>builder()

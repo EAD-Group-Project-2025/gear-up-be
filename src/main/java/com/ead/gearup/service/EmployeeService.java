@@ -176,8 +176,11 @@ public class EmployeeService {
                 .map(p -> new EmployeeSearchResponseDTO(
                         p.getEmployeeId(),
                         new UserResponseDTO(
+                                p.getEmail(),
                                 p.getName(),
-                                p.getEmail()),
+                                null, // role not available in projection
+                                null  // verified status not available in projection
+                        ),
                         p.getSpecialization(),
                         p.getHireDate()))
                 .collect(Collectors.toList());

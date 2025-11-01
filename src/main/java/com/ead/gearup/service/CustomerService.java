@@ -264,8 +264,10 @@ public class CustomerService {
                 .map(p -> new CustomerSearchResponseDTO(
                         p.getCustomerId(),
                         new UserResponseDTO(
+                                p.getEmail(),
                                 p.getName(),
-                                p.getEmail()
+                                null, // role not available in projection
+                                null  // verified status not available in projection
                         ),
                         p.getPhoneNumber()))
                 .collect(Collectors.toList());

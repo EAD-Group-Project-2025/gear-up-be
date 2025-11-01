@@ -125,6 +125,11 @@ public class GlobalExceptionHandler {
                 .data(null)
                 .build();
 
+        // Return 400 for auth endpoints (security: avoid revealing user existence)
+        // Return 404 for other endpoints
+        if (request.getRequestURI().contains("/auth/")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
     
@@ -363,7 +368,7 @@ public class GlobalExceptionHandler {
                 .data(null)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
 }
