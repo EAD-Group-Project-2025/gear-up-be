@@ -3,9 +3,10 @@
 ## 📊 Overall Test Results
 
 ```
-Total Tests: 64
+Total Tests: 91
   - AuthService: 28 tests
   - JwtService: 36 tests
+  - EmailVerificationService: 27 tests
 Failures: 0
 Errors: 0
 Skipped: 0
@@ -106,6 +107,45 @@ Success Rate: 100% ✨
 - ✅ Should return correct JWT expiration millis
 - ✅ Should return correct refresh token duration
 
+## EmailVerificationService Tests (27 tests)
+
+### **13. Email Verification Disabled Tests** (5 tests)
+- ✅ Should auto-verify user when email verification is disabled
+- ✅ Should save user after auto-verification
+- ✅ Should not call email service when verification is disabled
+- ✅ Should not generate JWT token when verification is disabled
+- ✅ Should handle already verified user gracefully
+
+### **14. Email Verification Enabled Tests** (8 tests)
+- ✅ Should generate email verification token
+- ✅ Should send verification email with correct parameters
+- ✅ Should construct verification URL correctly
+- ✅ Should not auto-verify user when verification is enabled
+- ✅ Should not save user when verification is enabled
+- ✅ Should handle user with long name
+- ✅ Should handle user with special characters in name
+- ✅ Should handle different base URLs correctly
+
+### **15. Exception Handling Tests** (5 tests)
+- ✅ Should throw RuntimeException when token generation fails
+- ✅ Should throw RuntimeException when email service fails
+- ✅ Should include original exception message in wrapped exception
+- ✅ Should propagate exception cause
+- ✅ Should not throw exception when verification is disabled even if services fail
+
+### **16. Edge Cases and Boundary Tests** (6 tests)
+- ✅ Should handle user with minimal name
+- ✅ Should handle empty app base URL path
+- ✅ Should handle very long verification token
+- ✅ Should create UserPrinciple from unverified user
+- ✅ Should handle base URL with trailing slash
+- ✅ Should handle base URL without protocol
+
+### **17. Service Interaction Tests** (3 tests)
+- ✅ Should call services in correct order
+- ✅ Should not call email service if token generation fails
+- ✅ Should pass exact user details to services
+
 ## 📁 Files Created
 
 ### Test Code
@@ -113,6 +153,7 @@ Success Rate: 100% ✨
 src/test/java/com/ead/gearup/
 ├── unit/service/
 │   ├── AuthServiceTest.java (500+ lines, 28 tests) ✅
+│   ├── EmailVerificationServiceTest.java (550+ lines, 27 tests) ✅
 │   └── auth/
 │       └── JwtServiceTest.java (600+ lines, 36 tests) ✅
 ├── fixtures/
@@ -159,14 +200,14 @@ src/test/resources/
 ### Completed ✅
 1. ~~**AuthServiceTest**~~ - Authentication and user management (28 tests) ✅
 2. ~~**JwtServiceTest**~~ - JWT token generation and validation (36 tests) ✅
+3. ~~**EmailVerificationServiceTest**~~ - Email verification logic (27 tests) ✅
 
 ### Remaining Tests:
-3. **EmailVerificationServiceTest** - Email verification logic
-3. **UserServiceTest** - User management operations  
-4. **EmployeeManagementServiceTest** - Employee CRUD operations
-5. **CustomUserDetailsServiceTest** - UserDetails loading
-6. **EmailServiceTest** - Email sending functionality
-7. **RoleBasedAccessServiceTest** - Role checking logic
+4. **UserServiceTest** - User management operations
+5. **EmployeeManagementServiceTest** - Employee CRUD operations
+6. **CustomUserDetailsServiceTest** - UserDetails loading
+7. **EmailServiceTest** - Email sending functionality
+8. **RoleBasedAccessServiceTest** - Role checking logic
 
 ### Integration Tests:
 8. **AuthController Integration Tests**
@@ -177,20 +218,24 @@ src/test/resources/
 
 ### Run All Authentication Tests
 ```bash
-# All auth tests (AuthService + JwtService)
-./mvnw.cmd test -Dtest="**/AuthServiceTest,**/JwtServiceTest"
+# All auth tests (AuthService + JwtService + EmailVerificationService)
+./mvnw.cmd test -Dtest="**/AuthServiceTest,**/JwtServiceTest,**/EmailVerificationServiceTest"
 
 # AuthService only
 ./mvnw.cmd test -Dtest=AuthServiceTest
 
 # JwtService only
 ./mvnw.cmd test -Dtest=JwtServiceTest
+
+# EmailVerificationService only
+./mvnw.cmd test -Dtest=EmailVerificationServiceTest
 ```
 
 ### Run Specific Test Method
 ```bash
 ./mvnw.cmd test -Dtest=AuthServiceTest#createUser_ValidData_ReturnsUserResponse
 ./mvnw.cmd test -Dtest=JwtServiceTest#generateAccessToken_ValidUser_ReturnsValidToken
+./mvnw.cmd test -Dtest=EmailVerificationServiceTest#sendVerificationEmail_VerificationEnabled_SendsEmail
 ```
 
 ### View Coverage Report
@@ -224,16 +269,16 @@ test/auth-security-user-management
 
 ---
 
-**Status**: ✅ Authentication & Security Test Suite Complete (2/7 services)
+**Status**: ✅ Authentication & Security Test Suite Complete (3/7 services)
 **Date**: November 1, 2025
-**Tests Passing**: 64/64 (100%)
+**Tests Passing**: 91/91 (100%)
 
 **Completed Services:**
 - ✅ AuthService (28 tests)
 - ✅ JwtService (36 tests)
+- ✅ EmailVerificationService (27 tests)
 
 **Remaining Services:**
-- ⏳ EmailVerificationService
 - ⏳ UserService
 - ⏳ EmployeeManagementService
 - ⏳ EmailService
