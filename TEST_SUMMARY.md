@@ -3,7 +3,7 @@
 ## 📊 Overall Test Results
 
 ```
-Total Tests: 202 (159 Unit + 43 Integration)
+Total Tests: 231 (159 Unit + 72 Integration)
 
 Unit Tests: 159
   - AuthService: 28 tests
@@ -13,8 +13,9 @@ Unit Tests: 159
   - EmployeeManagementService: 37 tests
   - EmailService: 31 tests
 
-Integration Tests: 43
+Integration Tests: 72
   - AuthController: 43 tests
+  - AdminController: 29 tests
 
 Failures: 0
 Errors: 0
@@ -259,7 +260,49 @@ Success Rate: 100% ✨
 - ✅ Should handle multiple emails sent in sequence
 - ✅ Should handle template with unicode characters
 
-## Integration Tests (43 tests)
+## Integration Tests (72 tests)
+
+## AdminController Integration Tests (29 tests)
+
+### **42. Check Admin Init Endpoint Tests** (7 tests)
+**Endpoint:** `GET /api/v1/admin/check-init` (Requires ADMIN role)
+- ✅ Should return admin exists when admin present with admin auth
+- ✅ Should return admin not initialized with admin auth
+- ✅ Should return 401 without authentication
+- ✅ Should handle multiple admin users
+- ✅ Should return 403 when authenticated as CUSTOMER
+- ✅ Should return 403 when authenticated as EMPLOYEE
+
+### **43. Create Admin Endpoint Tests** (11 tests)
+**Endpoint:** `POST /api/v1/admin/create-admin` (Requires ADMIN role)
+- ✅ Should create admin with valid data and authentication
+- ✅ Should return 403 when authenticated as CUSTOMER
+- ✅ Should return 403 when authenticated as EMPLOYEE
+- ✅ Should return 401 when not authenticated
+- ✅ Should return 400 when email already exists
+- ✅ Should return 400 for invalid email
+- ✅ Should return 400 for weak password
+- ✅ Should return 400 for missing required fields
+- ✅ Should auto-verify admin account
+- ✅ Should encode password before saving
+- ✅ Should handle special characters in name
+
+### **44. Migrate Customers Endpoint Tests** (8 tests)
+**Endpoint:** `POST /api/v1/admin/migrate-customers` (Requires ADMIN role)
+- ✅ Should migrate customers with admin authentication
+- ✅ Should return 403 when authenticated as CUSTOMER
+- ✅ Should return 403 when authenticated as EMPLOYEE
+- ✅ Should return 401 when not authenticated
+- ✅ Should handle zero migrations when all customers exist
+- ✅ Should only migrate CUSTOMER role users
+- ✅ Should handle large batch of customers
+- ✅ Should set phoneNumber to null for migrated customers
+- ✅ Should not affect existing customers
+
+### **45. Integration Scenario Tests** (3 tests)
+- ✅ Admin creates another admin and new admin can migrate customers
+- ✅ Check init before and after admin creation
+- ✅ Multiple migrations are idempotent
 
 ## AuthController Integration Tests (43 tests)
 
@@ -350,8 +393,9 @@ src/test/java/com/ead/gearup/
 │   └── auth/
 │       └── JwtServiceTest.java (600+ lines, 36 tests) ✅
 │
-├── integration/controller/                            # Integration Tests (43)
-│   └── AuthControllerIntegrationTest.java (1000+ lines, 43 tests) ✅
+├── integration/controller/                            # Integration Tests (72)
+│   ├── AuthControllerIntegrationTest.java (1000+ lines, 43 tests) ✅
+│   └── AdminControllerIntegrationTest.java (750+ lines, 29 tests) ✅
 │
 ├── fixtures/
 │   ├── UserFixtures.java ✅
@@ -404,19 +448,23 @@ src/test/resources/
 5. ~~**EmployeeManagementServiceTest**~~ - Employee CRUD operations (37 tests) ✅
 6. ~~**EmailServiceTest**~~ - Email sending functionality (31 tests) ✅
 
-#### Integration Tests (43 tests) ✅
+#### Integration Tests (72 tests) ✅
 7. ~~**AuthControllerIntegrationTest**~~ - Full HTTP endpoint testing (43 tests) ✅
    - Registration, login, email verification
    - Token refresh and logout
    - Password management
    - Integration scenarios
+8. ~~**AdminControllerIntegrationTest**~~ - Admin-specific endpoints (29 tests) ✅
+   - Check admin initialization
+   - Create additional admins
+   - Migrate customers
+   - Admin role-based access control
 
 ### Remaining Unit Tests:
-8. **CustomUserDetailsServiceTest** - UserDetails loading
-9. **RoleBasedAccessServiceTest** - Role checking logic
+9. **CustomUserDetailsServiceTest** - UserDetails loading
+10. **RoleBasedAccessServiceTest** - Role checking logic
 
 ### Remaining Integration Tests:
-10. **AdminController Integration Tests** - Admin-specific endpoints
 11. **Security Integration Tests** - Security configuration testing
 12. **Repository Integration Tests** - Database layer testing
 
@@ -450,13 +498,22 @@ src/test/resources/
 
 ### Run Integration Tests
 ```bash
+# All integration tests
+./mvnw.cmd test -Dtest=AuthControllerIntegrationTest,AdminControllerIntegrationTest
+
 # All AuthController integration tests
 ./mvnw.cmd test -Dtest=AuthControllerIntegrationTest
+
+# All AdminController integration tests
+./mvnw.cmd test -Dtest=AdminControllerIntegrationTest
 
 # Specific endpoint group
 ./mvnw.cmd test -Dtest=AuthControllerIntegrationTest#registerUser*
 ./mvnw.cmd test -Dtest=AuthControllerIntegrationTest#login*
 ./mvnw.cmd test -Dtest=AuthControllerIntegrationTest#changePassword*
+./mvnw.cmd test -Dtest=AdminControllerIntegrationTest#checkAdminInit*
+./mvnw.cmd test -Dtest=AdminControllerIntegrationTest#createAdmin*
+./mvnw.cmd test -Dtest=AdminControllerIntegrationTest#migrateCustomers*
 ```
 
 ### Run Specific Test Method
@@ -471,6 +528,9 @@ src/test/resources/
 ./mvnw.cmd test -Dtest=AuthControllerIntegrationTest#registerUser_ValidData_Success
 ./mvnw.cmd test -Dtest=AuthControllerIntegrationTest#login_ValidCredentials_Success
 ./mvnw.cmd test -Dtest=AuthControllerIntegrationTest#integrationScenario_RegisterVerifyLogin_Success
+./mvnw.cmd test -Dtest=AdminControllerIntegrationTest#checkAdminInit_AdminExists_ReturnsTrue
+./mvnw.cmd test -Dtest=AdminControllerIntegrationTest#createAdmin_ValidDataWithAdminAuth_Success
+./mvnw.cmd test -Dtest=AdminControllerIntegrationTest#migrateCustomers_AdminAuth_Success
 ```
 
 ### View Coverage Report
@@ -518,9 +578,9 @@ test/auth-security-user-management
 
 ---
 
-**Status**: ✅ Authentication & Security Test Suite - Phase 1 Complete
+**Status**: ✅ Authentication & Security Test Suite - Phase 2 Complete
 **Date**: November 1, 2025
-**Total Tests**: 202 (159 Unit + 43 Integration)
+**Total Tests**: 231 (159 Unit + 72 Integration)
 **Success Rate**: 100% ✨
 
 ### Completed Unit Tests (159 tests) ✅
@@ -531,7 +591,7 @@ test/auth-security-user-management
 - ✅ EmployeeManagementService (37 tests)
 - ✅ EmailService (31 tests)
 
-### Completed Integration Tests (43 tests) ✅
+### Completed Integration Tests (72 tests) ✅
 - ✅ AuthController (43 tests)
   - 9 Registration tests
   - 4 Email verification tests
@@ -542,13 +602,18 @@ test/auth-security-user-management
   - 7 Change password tests
   - 3 Password status tests
   - 3 Integration scenario tests
+  
+- ✅ AdminController (29 tests)
+  - 7 Check admin init tests
+  - 11 Create admin tests
+  - 8 Migrate customers tests
+  - 3 Integration scenario tests
 
 ### Remaining Unit Tests
 - ⏳ CustomUserDetailsService
 - ⏳ RoleBasedAccessService
 
 ### Remaining Integration Tests
-- ⏳ AdminController Integration Tests
 - ⏳ Security Integration Tests
 - ⏳ Repository Integration Tests
 
