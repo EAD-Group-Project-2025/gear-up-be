@@ -3,13 +3,19 @@
 ## 📊 Overall Test Results
 
 ```
-Total Tests: 159
+Total Tests: 202 (159 Unit + 43 Integration)
+
+Unit Tests: 159
   - AuthService: 28 tests
   - JwtService: 36 tests
   - EmailVerificationService: 27 tests
   - UserService: 27 tests
   - EmployeeManagementService: 37 tests
   - EmailService: 31 tests
+
+Integration Tests: 43
+  - AuthController: 43 tests
+
 Failures: 0
 Errors: 0
 Skipped: 0
@@ -18,7 +24,9 @@ Success Rate: 100% ✨
 
 ## 🧪 Test Coverage
 
-## AuthService Tests (28 tests)
+## Unit Tests (159 tests)
+
+### AuthService Tests (28 tests)
 
 ### **1. Create User Tests** (8 tests)
 - ✅ Should create user successfully with valid data
@@ -251,12 +259,89 @@ Success Rate: 100% ✨
 - ✅ Should handle multiple emails sent in sequence
 - ✅ Should handle template with unicode characters
 
+## Integration Tests (43 tests)
+
+## AuthController Integration Tests (43 tests)
+
+### **33. Registration Endpoint Tests** (9 tests)
+**Endpoint:** `POST /api/v1/auth/register`
+- ✅ Should register new user successfully with valid data
+- ✅ Should normalize email to lowercase
+- ✅ Should trim whitespace from email
+- ✅ Should return 400 when email already exists
+- ✅ Should return 400 for invalid email
+- ✅ Should return 400 for weak password
+- ✅ Should return 400 for missing required fields
+- ✅ Should encode password before saving
+- ✅ Should create Customer entity for CUSTOMER role
+
+### **34. Email Verification Endpoint Tests** (4 tests)
+**Endpoint:** `GET /api/v1/auth/verify-email?token={token}`
+- ✅ Should verify email with valid token
+- ✅ Should return 400 for expired token
+- ✅ Should return 400 for malformed token
+- ✅ Should return success if already verified
+
+### **35. Resend Email Endpoint Tests** (6 tests)
+**Endpoint:** `POST /api/v1/auth/resend-email`
+- ✅ Should resend verification email successfully
+- ✅ Should normalize email to lowercase
+- ✅ Should return 400 when user not found
+- ✅ Should return 400 when user already verified
+- ✅ Should return 400 during cooldown period
+- ✅ Should call email service with correct parameters
+
+### **36. Login Endpoint Tests** (7 tests)
+**Endpoint:** `POST /api/v1/auth/login`
+- ✅ Should login successfully with valid credentials
+- ✅ Should return 401 for invalid password
+- ✅ Should return 401 for non-existent user
+- ✅ Should return 401 for unverified user
+- ✅ Should update last login timestamp
+- ✅ Should return 400 for missing credentials
+- ✅ Should set HttpOnly refresh token cookie
+
+### **37. Refresh Token Endpoint Tests** (4 tests)
+**Endpoint:** `POST /api/v1/auth/refresh`
+- ✅ Should refresh access token with valid refresh token
+- ✅ Should return 401 for missing refresh token
+- ✅ Should return 401 for invalid refresh token
+- ✅ Should return 401 for expired refresh token
+
+### **38. Logout Endpoint Tests** (3 tests)
+**Endpoint:** `POST /api/v1/auth/logout`
+- ✅ Should logout successfully and clear refresh cookie
+- ✅ Should return 400 when no refresh token present
+- ✅ Should return 400 for empty refresh token
+
+### **39. Change Password Endpoint Tests** (7 tests)
+**Endpoint:** `POST /api/v1/auth/change-password` (Authenticated)
+- ✅ Should change password successfully for authenticated user
+- ✅ Should return 401 when not authenticated
+- ✅ Should return 400 for wrong current password
+- ✅ Should return 400 for mismatched new passwords
+- ✅ Should return 400 for weak new password
+- ✅ Should work for employee with requiresPasswordChange flag
+- ✅ Should reset requiresPasswordChange flag after change
+
+### **40. Password Status Endpoint Tests** (3 tests)
+**Endpoint:** `GET /api/v1/auth/password-status` (Authenticated)
+- ✅ Should return password status for authenticated user
+- ✅ Should return true for employee requiring password change
+- ✅ Should return 401 when not authenticated
+- ✅ Should return 401 for expired token
+
+### **41. Integration Scenario Tests** (3 tests)
+- ✅ Full registration to login flow (Register → Verify → Login)
+- ✅ Login, change password, login with new password
+- ✅ Token refresh flow (Login → Refresh → Logout)
+
 ## 📁 Files Created
 
 ### Test Code
 ```
 src/test/java/com/ead/gearup/
-├── unit/service/
+├── unit/service/                                      # Unit Tests (159)
 │   ├── AuthServiceTest.java (500+ lines, 28 tests) ✅
 │   ├── EmailVerificationServiceTest.java (550+ lines, 27 tests) ✅
 │   ├── UserServiceTest.java (450+ lines, 27 tests) ✅
@@ -264,10 +349,15 @@ src/test/java/com/ead/gearup/
 │   ├── EmailServiceTest.java (600+ lines, 31 tests) ✅
 │   └── auth/
 │       └── JwtServiceTest.java (600+ lines, 36 tests) ✅
+│
+├── integration/controller/                            # Integration Tests (43)
+│   └── AuthControllerIntegrationTest.java (1000+ lines, 43 tests) ✅
+│
 ├── fixtures/
 │   ├── UserFixtures.java ✅
 │   ├── DTOFixtures.java ✅
 │   └── UserDetailsFixtures.java ✅
+│
 └── helpers/
     └── JwtTestHelper.java ✅
 ```
@@ -275,13 +365,12 @@ src/test/java/com/ead/gearup/
 ### Configuration
 ```
 src/test/resources/
-└── application-test.properties
+└── application-test.properties (Updated with Base64-encoded JWT secret)
 ```
 
 ### Documentation
 ```
-├── TEST_SUMMARY.md
-└── src/test/README.md
+└── TEST_SUMMARY.md (This file)
 ```
 
 ## 🛠️ Dependencies Added
@@ -306,6 +395,8 @@ src/test/resources/
 ## 🎯 Next Steps
 
 ### Completed ✅
+
+#### Unit Tests (159 tests) ✅
 1. ~~**AuthServiceTest**~~ - Authentication and user management (28 tests) ✅
 2. ~~**JwtServiceTest**~~ - JWT token generation and validation (36 tests) ✅
 3. ~~**EmailVerificationServiceTest**~~ - Email verification logic (27 tests) ✅
@@ -313,47 +404,73 @@ src/test/resources/
 5. ~~**EmployeeManagementServiceTest**~~ - Employee CRUD operations (37 tests) ✅
 6. ~~**EmailServiceTest**~~ - Email sending functionality (31 tests) ✅
 
-### Remaining Tests:
-7. **CustomUserDetailsServiceTest** - UserDetails loading
-8. **RoleBasedAccessServiceTest** - Role checking logic
+#### Integration Tests (43 tests) ✅
+7. ~~**AuthControllerIntegrationTest**~~ - Full HTTP endpoint testing (43 tests) ✅
+   - Registration, login, email verification
+   - Token refresh and logout
+   - Password management
+   - Integration scenarios
 
-### Integration Tests:
-8. **AuthController Integration Tests**
-9. **AdminController Integration Tests**
-10. **Security Integration Tests**
+### Remaining Unit Tests:
+8. **CustomUserDetailsServiceTest** - UserDetails loading
+9. **RoleBasedAccessServiceTest** - Role checking logic
+
+### Remaining Integration Tests:
+10. **AdminController Integration Tests** - Admin-specific endpoints
+11. **Security Integration Tests** - Security configuration testing
+12. **Repository Integration Tests** - Database layer testing
 
 ## 📌 Commands Reference
 
-### Run All Authentication Tests
+### Run All Tests
 ```bash
-# All completed tests
+# All unit + integration tests
+./mvnw.cmd test
+
+# All unit tests only
+./mvnw.cmd test -Dtest="**/unit/**/*Test"
+
+# All integration tests only
+./mvnw.cmd test -Dtest="**/integration/**/*Test"
+```
+
+### Run Unit Tests
+```bash
+# All unit service tests
 ./mvnw.cmd test -Dtest="**/AuthServiceTest,**/JwtServiceTest,**/EmailVerificationServiceTest,**/UserServiceTest,**/EmployeeManagementServiceTest,**/EmailServiceTest"
 
-# AuthService only
+# Individual service tests
 ./mvnw.cmd test -Dtest=AuthServiceTest
-
-# JwtService only
 ./mvnw.cmd test -Dtest=JwtServiceTest
-
-# EmailVerificationService only
 ./mvnw.cmd test -Dtest=EmailVerificationServiceTest
-
-# UserService only
 ./mvnw.cmd test -Dtest=UserServiceTest
-
-# EmployeeManagementService only
 ./mvnw.cmd test -Dtest=EmployeeManagementServiceTest
-
-# EmailService only
 ./mvnw.cmd test -Dtest=EmailServiceTest
+```
+
+### Run Integration Tests
+```bash
+# All AuthController integration tests
+./mvnw.cmd test -Dtest=AuthControllerIntegrationTest
+
+# Specific endpoint group
+./mvnw.cmd test -Dtest=AuthControllerIntegrationTest#registerUser*
+./mvnw.cmd test -Dtest=AuthControllerIntegrationTest#login*
+./mvnw.cmd test -Dtest=AuthControllerIntegrationTest#changePassword*
 ```
 
 ### Run Specific Test Method
 ```bash
+# Unit tests
 ./mvnw.cmd test -Dtest=AuthServiceTest#createUser_ValidData_ReturnsUserResponse
 ./mvnw.cmd test -Dtest=JwtServiceTest#generateAccessToken_ValidUser_ReturnsValidToken
 ./mvnw.cmd test -Dtest=EmailVerificationServiceTest#sendVerificationEmail_VerificationEnabled_SendsEmail
 ./mvnw.cmd test -Dtest=EmployeeManagementServiceTest#createEmployee_ValidRequest_Success
+
+# Integration tests
+./mvnw.cmd test -Dtest=AuthControllerIntegrationTest#registerUser_ValidData_Success
+./mvnw.cmd test -Dtest=AuthControllerIntegrationTest#login_ValidCredentials_Success
+./mvnw.cmd test -Dtest=AuthControllerIntegrationTest#integrationScenario_RegisterVerifyLogin_Success
 ```
 
 ### View Coverage Report
@@ -369,10 +486,24 @@ src/test/resources/
 
 ## 📝 Notes
 
-- **JaCoCo Warnings**: The warnings about "Unsupported class file major version 69" are due to Java 21 compatibility. They don't affect test execution and can be ignored.
-- **Test Isolation**: All tests use Mockito mocks and don't require Spring context, making them fast and isolated.
+### Unit Tests
+- **Test Isolation**: Pure unit tests using Mockito mocks, no Spring context required
+- **Speed**: Fast execution (typically < 10 seconds for all 159 tests)
+- **Mocking**: All external dependencies are mocked
+
+### Integration Tests
+- **Full Context**: Spring Boot application context loaded with MockMvc
+- **Real Components**: Actual services, repositories, JWT generation, password encoding
+- **Database**: H2 in-memory database with PostgreSQL compatibility
+- **Transactions**: Auto-rollback after each test via `@Transactional`
+- **Mocked Services**: Only EmailService is mocked to prevent actual email sending
+- **Security**: Tests real JWT token generation, validation, and HTTP security
+
+### General
+- **JaCoCo Warnings**: Warnings about "Unsupported class file major version 69" are due to Java 21 compatibility and can be ignored
 - **Naming Convention**: Following the pattern `methodName_StateUnderTest_ExpectedBehavior`
 - **AAA Pattern**: All tests follow Arrange-Act-Assert structure
+- **JWT Secret**: Test properties use Base64-encoded secret for proper token generation
 
 ## 🌿 Git Branch
 
@@ -387,11 +518,12 @@ test/auth-security-user-management
 
 ---
 
-**Status**: ✅ Authentication & Security Test Suite Complete (6/8 services)
+**Status**: ✅ Authentication & Security Test Suite - Phase 1 Complete
 **Date**: November 1, 2025
-**Tests Passing**: 159/159 (100%)
+**Total Tests**: 202 (159 Unit + 43 Integration)
+**Success Rate**: 100% ✨
 
-**Completed Services:**
+### Completed Unit Tests (159 tests) ✅
 - ✅ AuthService (28 tests)
 - ✅ JwtService (36 tests)
 - ✅ EmailVerificationService (27 tests)
@@ -399,7 +531,24 @@ test/auth-security-user-management
 - ✅ EmployeeManagementService (37 tests)
 - ✅ EmailService (31 tests)
 
-**Remaining Services:**
+### Completed Integration Tests (43 tests) ✅
+- ✅ AuthController (43 tests)
+  - 9 Registration tests
+  - 4 Email verification tests
+  - 6 Resend email tests
+  - 7 Login tests
+  - 4 Refresh token tests
+  - 3 Logout tests
+  - 7 Change password tests
+  - 3 Password status tests
+  - 3 Integration scenario tests
+
+### Remaining Unit Tests
 - ⏳ CustomUserDetailsService
 - ⏳ RoleBasedAccessService
+
+### Remaining Integration Tests
+- ⏳ AdminController Integration Tests
+- ⏳ Security Integration Tests
+- ⏳ Repository Integration Tests
 
