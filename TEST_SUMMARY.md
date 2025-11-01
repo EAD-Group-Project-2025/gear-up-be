@@ -1,16 +1,20 @@
-# ✅ AuthService Unit Tests - Summary
+# ✅ Authentication & Security Test Suite - Summary
 
-## 📊 Test Results
+## 📊 Overall Test Results
 
 ```
-Tests run: 28
+Total Tests: 64
+  - AuthService: 28 tests
+  - JwtService: 36 tests
 Failures: 0
 Errors: 0
 Skipped: 0
-Success Rate: 100%
+Success Rate: 100% ✨
 ```
 
 ## 🧪 Test Coverage
+
+## AuthService Tests (28 tests)
 
 ### **1. Create User Tests** (8 tests)
 - ✅ Should create user successfully with valid data
@@ -50,18 +54,73 @@ Success Rate: 100%
 - ✅ Should throw exception for expired refresh token
 - ✅ Should handle user not found during token refresh
 
+## JwtService Tests (36 tests)
+
+### **6. Generate Access Token Tests** (8 tests)
+- ✅ Should generate access token with default claims
+- ✅ Should generate access token with extra claims
+- ✅ Should remove ROLE_ prefix from role claim
+- ✅ Should set correct expiration time for access token
+- ✅ Should include JWT type in header
+- ✅ Should generate different tokens for different users
+- ✅ Should generate different tokens on multiple calls
+- ✅ Should handle admin role correctly
+
+### **7. Generate Refresh Token Tests** (4 tests)
+- ✅ Should generate refresh token with correct claims
+- ✅ Should set correct expiration time for refresh token
+- ✅ Should remove ROLE_ prefix from role in refresh token
+- ✅ Should include correct token type
+
+### **8. Generate Email Verification Token Tests** (4 tests)
+- ✅ Should generate email verification token
+- ✅ Should have shortest expiration time
+- ✅ Should not include role claim
+- ✅ Should include correct token type
+
+### **9. Validate Access Token Tests** (6 tests)
+- ✅ Should validate correct access token
+- ✅ Should reject token with wrong username
+- ✅ Should reject expired token
+- ✅ Should reject refresh token as access token
+- ✅ Should reject email verification token as access token
+- ✅ Should reject malformed token
+
+### **10. Validate Refresh Token Tests** (4 tests)
+- ✅ Should validate correct refresh token
+- ✅ Should reject token with wrong username
+- ✅ Should reject expired refresh token
+- ✅ Should reject access token as refresh token
+
+### **11. Extract Token Claims Tests** (8 tests)
+- ✅ Should extract username from token
+- ✅ Should extract role from token
+- ✅ Should extract custom claim from token
+- ✅ Should extract subject claim
+- ✅ Should extract expiration date
+- ✅ Should extract issued at date
+- ✅ Should throw exception for malformed token
+- ✅ Should extract token type
+
+### **12. Configuration Getters Tests** (2 tests)
+- ✅ Should return correct JWT expiration millis
+- ✅ Should return correct refresh token duration
+
 ## 📁 Files Created
 
 ### Test Code
 ```
 src/test/java/com/ead/gearup/
 ├── unit/service/
-│   └── AuthServiceTest.java (500+ lines, 28 tests)
+│   ├── AuthServiceTest.java (500+ lines, 28 tests) ✅
+│   └── auth/
+│       └── JwtServiceTest.java (600+ lines, 36 tests) ✅
 ├── fixtures/
-│   ├── UserFixtures.java
-│   └── DTOFixtures.java
+│   ├── UserFixtures.java ✅
+│   ├── DTOFixtures.java ✅
+│   └── UserDetailsFixtures.java ✅
 └── helpers/
-    └── JwtTestHelper.java
+    └── JwtTestHelper.java ✅
 ```
 
 ### Configuration
@@ -97,9 +156,12 @@ src/test/resources/
 
 ## 🎯 Next Steps
 
-### Recommended Order:
-1. **JwtServiceTest** - JWT token generation and validation
-2. **EmailVerificationServiceTest** - Email verification logic
+### Completed ✅
+1. ~~**AuthServiceTest**~~ - Authentication and user management (28 tests) ✅
+2. ~~**JwtServiceTest**~~ - JWT token generation and validation (36 tests) ✅
+
+### Remaining Tests:
+3. **EmailVerificationServiceTest** - Email verification logic
 3. **UserServiceTest** - User management operations  
 4. **EmployeeManagementServiceTest** - Employee CRUD operations
 5. **CustomUserDetailsServiceTest** - UserDetails loading
@@ -113,14 +175,22 @@ src/test/resources/
 
 ## 📌 Commands Reference
 
-### Run All AuthService Tests
+### Run All Authentication Tests
 ```bash
+# All auth tests (AuthService + JwtService)
+./mvnw.cmd test -Dtest="**/AuthServiceTest,**/JwtServiceTest"
+
+# AuthService only
 ./mvnw.cmd test -Dtest=AuthServiceTest
+
+# JwtService only
+./mvnw.cmd test -Dtest=JwtServiceTest
 ```
 
 ### Run Specific Test Method
 ```bash
 ./mvnw.cmd test -Dtest=AuthServiceTest#createUser_ValidData_ReturnsUserResponse
+./mvnw.cmd test -Dtest=JwtServiceTest#generateAccessToken_ValidUser_ReturnsValidToken
 ```
 
 ### View Coverage Report
@@ -154,7 +224,18 @@ test/auth-security-user-management
 
 ---
 
-**Status**: ✅ AuthService Unit Tests Complete
+**Status**: ✅ Authentication & Security Test Suite Complete (2/7 services)
 **Date**: November 1, 2025
-**Tests Passing**: 28/28 (100%)
+**Tests Passing**: 64/64 (100%)
+
+**Completed Services:**
+- ✅ AuthService (28 tests)
+- ✅ JwtService (36 tests)
+
+**Remaining Services:**
+- ⏳ EmailVerificationService
+- ⏳ UserService
+- ⏳ EmployeeManagementService
+- ⏳ EmailService
+- ⏳ CustomUserDetailsService
 
