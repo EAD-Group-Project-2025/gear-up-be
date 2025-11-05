@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import com.ead.gearup.dto.vehicle.VehicleCreateDTO;
 import com.ead.gearup.dto.vehicle.VehicleResponseDTO;
 import com.ead.gearup.dto.vehicle.VehicleUpdateDTO;
+import com.ead.gearup.model.Customer;
 import com.ead.gearup.model.Vehicle;
 import com.ead.gearup.repository.VehicleRepository;
 
@@ -17,7 +18,7 @@ public class VehicleDTOConverter {
     private final VehicleRepository vehicleRepository;
 
     // Convert VehicleDTO to Vehicle entity
-    public Vehicle convertToEntity(VehicleCreateDTO dto) {
+    public Vehicle convertToEntity(VehicleCreateDTO dto, Customer customer) {
         Vehicle vehicle = new Vehicle();
 
         vehicle.setLicensePlate(dto.getLicensePlate());
@@ -25,6 +26,7 @@ public class VehicleDTOConverter {
         vehicle.setModel(dto.getModel());
         vehicle.setVin(dto.getVin());
         vehicle.setYear(dto.getYear());
+        vehicle.setCustomer(customer);
 
         return vehicle;
     }
@@ -38,7 +40,7 @@ public class VehicleDTOConverter {
         dto.setModel(savedVehicle.getModel());
         dto.setVin(savedVehicle.getVin());
         dto.setYear(savedVehicle.getYear());
-
+        
         return dto;
     }
 

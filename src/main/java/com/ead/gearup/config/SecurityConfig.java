@@ -52,13 +52,19 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
+                                "/graphql/**",
+                                "/graphiql/**",
+                                "/vendor/**",
                                 "/swagger-ui.html",
-                                "/api/auth/**",
-                                "/api/public/**")
+                                "/swagger",
+                                "/api/v1/auth/**",
+                                "/api/v1/public/**",
+                                "/actuator/**")
                         .permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        // .requestMatchers("/api/customers/**").hasRole("CUSTOMER")
-                        // .requestMatchers("/api/employees/**").hasRole("EMPLOYEE")
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/chat/**").authenticated() // Chat requires authentication
+                        // .requestMatchers("/api/v1/customers/**").hasRole("CUSTOMER")
+                        // .requestMatchers("/api/v1/employees/**").hasRole("EMPLOYEE")
                         .anyRequest().authenticated())
 
                 // Stateless session
@@ -78,21 +84,21 @@ public class SecurityConfig {
 
                     res.getWriter().write(objectMapper.writeValueAsString(apiResponse));
                 })
-                
-                // 403 - Authenticated but insufficient role
-                .accessDeniedHandler((req, res, accessDeniedEx) -> {
-                    res.setContentType("application/json");
-                    res.setStatus(HttpServletResponse.SC_FORBIDDEN);
 
-                    ApiResponseDTO<Object> apiResponse = ApiResponseDTO.builder()
-                            .status("error")
-                            .message("Forbidden: Access denied")
-                            .path(req.getRequestURI())
-                            .data(null)
-                            .build();
+                        // 403 - Authenticated but insufficient role
+                        .accessDeniedHandler((req, res, accessDeniedEx) -> {
+                            res.setContentType("application/json");
+                            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
 
-                    res.getWriter().write(objectMapper.writeValueAsString(apiResponse));
-                }))
+                            ApiResponseDTO<Object> apiResponse = ApiResponseDTO.builder()
+                                    .status("error")
+                                    .message("Forbidden: Access denied")
+                                    .path(req.getRequestURI())
+                                    .data(null)
+                                    .build();
+
+                            res.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+                        }))
 
                 // Add JWT filter before UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

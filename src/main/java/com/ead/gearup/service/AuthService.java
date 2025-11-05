@@ -1,6 +1,8 @@
 package com.ead.gearup.service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,12 +19,15 @@ import com.ead.gearup.dto.response.LoginResponseDTO;
 import com.ead.gearup.dto.response.UserResponseDTO;
 import com.ead.gearup.dto.user.UserCreateDTO;
 import com.ead.gearup.dto.user.UserLoginDTO;
+import com.ead.gearup.enums.UserRole;
 import com.ead.gearup.exception.EmailAlreadyExistsException;
 import com.ead.gearup.exception.InvalidRefreshTokenException;
 import com.ead.gearup.exception.ResendEmailCooldownException;
 import com.ead.gearup.exception.UserNotFoundException;
+import com.ead.gearup.model.Customer;
 import com.ead.gearup.model.User;
 import com.ead.gearup.model.UserPrinciple;
+import com.ead.gearup.repository.CustomerRepository;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.auth.CustomUserDetailsService;
 import com.ead.gearup.service.auth.JwtService;
@@ -40,6 +45,7 @@ public class AuthService {
 
     private final PasswordEncoder encoder;
     private final UserRepository userRepository;
+    private final CustomerRepository customerRepository;
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
@@ -55,6 +61,7 @@ public class AuthService {
                 .email(email)
                 .name(userCreateDTO.getName())
                 .password(encoder.encode(userCreateDTO.getPassword()))
+                .role(UserRole.CUSTOMER) // Self-registered users are always CUSTOMER
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -62,6 +69,15 @@ public class AuthService {
             userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
             throw new EmailAlreadyExistsException(email);
+        }
+
+        // Create corresponding Customer entity for users with CUSTOMER role
+        if (user.getRole() == UserRole.CUSTOMER) {
+            Customer customer = Customer.builder()
+                    .user(user)
+                    .phoneNumber(null) // Can be updated later in profile
+                    .build();
+            customerRepository.save(customer);
         }
 
         emailVerificationService.sendVerificationEmail(user);
@@ -142,7 +158,11 @@ public class AuthService {
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
 
-        String accessToken = jwtService.generateAccessToken(userPrinciple);
+        // Add requiresPasswordChange flag to JWT token
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("requiresPasswordChange", user.getRequiresPasswordChange() != null && user.getRequiresPasswordChange());
+
+        String accessToken = jwtService.generateAccessToken(userPrinciple, extraClaims);
         String refreshToken = jwtService.generateRefreshToken(userPrinciple);
 
         return new JwtTokensDTO(accessToken, refreshToken);
