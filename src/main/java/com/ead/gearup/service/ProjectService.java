@@ -21,6 +21,7 @@ import com.ead.gearup.validation.RequiresRole;
 import com.ead.gearup.util.ProjectDTOConverter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -34,6 +35,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectService {
 
     private final CurrentUserService currentUserService;
@@ -41,15 +43,44 @@ public class ProjectService {
     private final AppointmentRepository appointmentRepository;
     private final VehicleRepository vehicleRepository;
     private final TaskRepository taskRepository;
+    private final EmployeeRepository employeeRepository;
     private final ProjectDTOConverter projectDTOConverter;
     private final TaskDTOConverter taskDTOConverter;
 
 
-    @RequiresRole({UserRole.EMPLOYEE, UserRole.ADMIN})
+    @Transactional
+    @RequiresRole({UserRole.CUSTOMER, UserRole.EMPLOYEE, UserRole.ADMIN})
     public ProjectResponseDTO createProject(CreateProjectDTO dto) {
+        System.out.println("=== CREATE PROJECT STARTED ===");
+        System.out.println("Appointment ID: " + dto.getAppointmentId());
+        System.out.println("Vehicle ID: " + dto.getVehicleId());
+        System.out.println("Task IDs: " + dto.getTaskIds());
+
         Appointment appointment = appointmentRepository.findById(dto.getAppointmentId())
                 .orElseThrow(() -> new AppointmentNotFoundException(
                         "Appointment not found: " + dto.getAppointmentId()));
+
+        // Check if a project already exists for this appointment
+        if (projectRepository.existsByAppointmentAppointmentId(dto.getAppointmentId())) {
+            System.out.println("Project already exists for appointment: " + dto.getAppointmentId());
+            // Return the existing project instead of creating a duplicate
+            Project existingProject = projectRepository.findByAppointmentAppointmentId(dto.getAppointmentId())
+                    .orElseThrow(() -> new ProjectNotFoundException("Project exists but could not be retrieved"));
+            System.out.println("Returning existing project ID: " + existingProject.getProjectId());
+            return projectDTOConverter.convertToResponseDto(existingProject);
+        }
+
+        System.out.println("No existing project found, creating new one...");
+
+        // Verify that the customer creating the project owns the appointment
+        UserRole role = currentUserService.getCurrentUserRole();
+        if (role == UserRole.CUSTOMER) {
+            Long customerId = currentUserService.getCurrentEntityId();
+            if (!appointment.getCustomer().getCustomerId().equals(customerId)) {
+                throw new UnauthorizedAppointmentAccessException(
+                        "You cannot create a project for another customer's appointment");
+            }
+        }
 
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
                 .orElseThrow(() -> new VehicleNotFoundException(
@@ -60,15 +91,45 @@ public class ProjectService {
             throw new TaskNotFoundException("No valid tasks found for project");
         }
 
+        // Eagerly initialize customer to avoid lazy loading issues
+        Customer customer = appointment.getCustomer();
+        // Access customer ID to initialize the proxy
+        customer.getCustomerId();
+
         Project project = projectDTOConverter.convertToEntity(dto);
         project.setAppointment(appointment);
         project.setVehicle(vehicle);
-        project.setTasks(tasks);
-        project.setStatus(ProjectStatus.CREATED);
+        project.setCustomer(customer);
 
-        projectRepository.save(project);
+        // Initialize all default values explicitly
+        project.setAcceptedServicesCount(0);
+        project.setTotalEstimatedCost(0.0);
+        project.setTotalAcceptedCost(0.0);
 
-        return projectDTOConverter.convertToResponseDto(project);
+        // Set a valid status - IN_PROGRESS is a safe default for new projects
+        project.setStatus(ProjectStatus.IN_PROGRESS);
+
+        // Save project first to get an ID
+        System.out.println("Saving project...");
+        Project savedProject = projectRepository.save(project);
+        System.out.println("Project saved with ID: " + savedProject.getProjectId());
+
+        // Set bidirectional relationship between project and tasks
+        System.out.println("Linking " + tasks.size() + " tasks to project...");
+        tasks.forEach(task -> {
+            task.setProject(savedProject);
+            task.setAssignedProject(true);
+        });
+        taskRepository.saveAll(tasks);
+        System.out.println("Tasks saved");
+
+        // Add tasks to project's task list
+        savedProject.setTasks(tasks);
+        Project finalProject = projectRepository.save(savedProject);
+        System.out.println("Final project saved with " + finalProject.getTasks().size() + " tasks");
+        System.out.println("=== CREATE PROJECT COMPLETED SUCCESSFULLY ===");
+
+        return projectDTOConverter.convertToResponseDto(finalProject);
     }
 
     @RequiresRole({UserRole.EMPLOYEE, UserRole.ADMIN})
@@ -82,10 +143,17 @@ public class ProjectService {
         return projectDTOConverter.convertToResponseDto(project);
     }
 
+    @Transactional
     @RequiresRole({UserRole.CUSTOMER, UserRole.EMPLOYEE, UserRole.ADMIN})
     public ProjectResponseDTO getProjectById(Long projectId) {
+        log.info("=== GET PROJECT BY ID ===");
+        log.info("Project ID: {}", projectId);
+
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException("Project not found: " + projectId));
+
+        log.info("Project found: {} with {} tasks", project.getName(),
+                 project.getTasks() != null ? project.getTasks().size() : 0);
 
         UserRole role = currentUserService.getCurrentUserRole();
 
@@ -105,19 +173,33 @@ public class ProjectService {
             }
         }
 
-        return projectDTOConverter.convertToResponseDto(project);
+        ProjectResponseDTO dto = projectDTOConverter.convertToResponseDto(project);
+        log.info("Converted DTO with taskIds: {}", dto.getTaskIds());
+        return dto;
     }
 
+    @Transactional
     @RequiresRole({UserRole.CUSTOMER, UserRole.EMPLOYEE, UserRole.ADMIN})
     public List<ProjectResponseDTO> getAllProjects() {
         UserRole role = currentUserService.getCurrentUserRole();
 
+        log.info("=== GET ALL PROJECTS ===");
+        log.info("User role: {}", role);
+
         if (role == UserRole.CUSTOMER) {
             Long customerId = currentUserService.getCurrentEntityId();
-            return projectRepository.findAll().stream()
-                    .filter(p -> p.getCustomer().getCustomerId().equals(customerId))
+            log.info("Fetching projects for customer ID: {}", customerId);
+
+            // Use optimized query with JOIN FETCH to avoid lazy loading issues
+            List<Project> customerProjects = projectRepository.findAllByCustomerIdWithDetails(customerId);
+            log.info("Projects found for customer: {}", customerProjects.size());
+
+            List<ProjectResponseDTO> result = customerProjects.stream()
                     .map(projectDTOConverter::convertToResponseDto)
                     .toList();
+
+            log.info("Successfully converted {} projects to DTOs", result.size());
+            return result;
         }
 
         if (role == UserRole.EMPLOYEE) {
@@ -288,6 +370,33 @@ public class ProjectService {
         return projectDTOConverter.convertToResponseDto(project);
     }
 
+    @Transactional
+    @RequiresRole({UserRole.ADMIN})
+    public ProjectResponseDTO assignEmployees(Long projectId, List<Long> employeeIds) {
+        log.info("=== ASSIGN EMPLOYEES TO PROJECT ===");
+        log.info("Project ID: {}, Employee IDs: {}", projectId, employeeIds);
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException("Project not found: " + projectId));
+
+        // Fetch employees by IDs
+        List<Employee> employees = employeeRepository.findAllById(employeeIds);
+
+        if (employees.isEmpty()) {
+            throw new ResourceNotFoundException("No valid employees found for the provided IDs");
+        }
+
+        log.info("Found {} employees to assign", employees.size());
+
+        // Clear existing assignments and add new ones
+        project.getAssignedEmployees().clear();
+        project.getAssignedEmployees().addAll(employees);
+
+        projectRepository.save(project);
+        log.info("Employees assigned successfully to project {}", projectId);
+
+        return projectDTOConverter.convertToResponseDto(project);
+    }
 
 
 
