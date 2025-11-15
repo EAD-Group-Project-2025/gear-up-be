@@ -65,6 +65,7 @@ class TaskServiceUnitTest {
         // Setup test appointment
         testAppointment = new Appointment();
         testAppointment.setAppointmentId(1L);
+        testAppointment.setCustomer(testCustomer);  // Set the customer on the appointment
 
         // Setup test project
         testProject = new Project();

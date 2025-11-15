@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.ead.gearup.dto.customer.CustomerRequestDTO;
@@ -31,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @SuppressWarnings("removal")
 class CustomerControllerIntegrationTest {
 
@@ -56,11 +58,11 @@ class CustomerControllerIntegrationTest {
         testCustomerResponse.setPhoneNumber("1234567890");
 
         testCustomerRequest = new CustomerRequestDTO();
-        testCustomerRequest.setPhoneNumber("1234567890");
+        testCustomerRequest.setPhoneNumber("0771234567");
 
         testCustomerUpdate = new CustomerUpdateDTO();
         testCustomerUpdate.setName("Updated Customer");
-        testCustomerUpdate.setPhoneNumber("9876543210");
+        testCustomerUpdate.setPhoneNumber("0779876543");
     }
 
     // ========== GET /api/v1/customers ==========

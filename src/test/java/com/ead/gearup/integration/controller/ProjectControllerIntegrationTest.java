@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.ead.gearup.dto.employee.EmployeeProjectDetailResponseDTO;
@@ -32,12 +33,14 @@ import com.ead.gearup.dto.task.TaskResponseDTO;
 import com.ead.gearup.dto.task.TaskStatusUpdateDTO;
 import com.ead.gearup.enums.ProjectStatus;
 import com.ead.gearup.exception.ProjectNotFoundException;
+import com.ead.gearup.exception.ResourceNotFoundException;
 import com.ead.gearup.service.ProjectService;
 import com.ead.gearup.service.auth.CurrentUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @SuppressWarnings("removal")
 class ProjectControllerIntegrationTest {
 
@@ -66,8 +69,10 @@ class ProjectControllerIntegrationTest {
         testProjectResponse.setName("Test Project");
 
         testProjectCreate = new CreateProjectDTO();
+        testProjectCreate.setName("Test Project");
         testProjectCreate.setAppointmentId(1L);
         testProjectCreate.setVehicleId(1L);
+        testProjectCreate.setTaskIds(Arrays.asList(1L, 2L));
 
         testProjectUpdate = new UpdateProjectDTO();
         testProjectUpdate.setDescription("Updated project description");
@@ -137,7 +142,7 @@ class ProjectControllerIntegrationTest {
     void testGetProjectById_NotFound() throws Exception {
         // Arrange
         when(projectService.getProjectById(999L))
-                .thenThrow(new ProjectNotFoundException("Project not found"));
+                .thenThrow(new ResourceNotFoundException("Project not found"));
 
         // Act & Assert
         mockMvc.perform(get("/api/v1/projects/999"))
@@ -225,6 +230,7 @@ class ProjectControllerIntegrationTest {
     void testUpdateServiceStatus_Success() throws Exception {
         // Arrange
         TaskStatusUpdateDTO statusUpdate = new TaskStatusUpdateDTO();
+        statusUpdate.setStatus(com.ead.gearup.enums.TaskStatus.COMPLETED);
         TaskResponseDTO taskResponse = new TaskResponseDTO();
         taskResponse.setTaskId(1L);
 

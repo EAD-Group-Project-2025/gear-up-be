@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 
+import com.ead.gearup.GearupApplication;
 import com.ead.gearup.controller.SearchGraphQLController;
 import com.ead.gearup.dto.appointment.AppointmentSearchResponseDTO;
 import com.ead.gearup.dto.customer.CustomerSearchResponseDTO;
@@ -24,7 +26,8 @@ import com.ead.gearup.service.CustomerService;
 import com.ead.gearup.service.EmployeeService;
 import com.ead.gearup.service.TaskService;
 
-@SpringBootTest
+@SpringBootTest(classes = GearupApplication.class)
+@ActiveProfiles("test")
 @SuppressWarnings("removal")
 class SearchGraphQLControllerTest {
 

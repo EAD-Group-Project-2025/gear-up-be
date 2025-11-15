@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.ead.gearup.dto.task.EmployeeRecentActivityDTO;
@@ -24,12 +25,14 @@ import com.ead.gearup.dto.task.TaskCreateDTO;
 import com.ead.gearup.dto.task.TaskResponseDTO;
 import com.ead.gearup.dto.task.TaskUpdateDTO;
 import com.ead.gearup.enums.TaskStatus;
+import com.ead.gearup.exception.ResourceNotFoundException;
 import com.ead.gearup.exception.TaskNotFoundException;
 import com.ead.gearup.service.TaskService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @SuppressWarnings("removal")
 class TaskControllerIntegrationTest {
 
@@ -118,7 +121,7 @@ class TaskControllerIntegrationTest {
     void testGetTaskById_NotFound() throws Exception {
         // Arrange
         when(taskService.getTaskById(999L))
-                .thenThrow(new TaskNotFoundException("Task not found"));
+                .thenThrow(new ResourceNotFoundException("Task not found"));
 
         // Act & Assert
         mockMvc.perform(get("/api/v1/tasks/999"))
@@ -186,7 +189,7 @@ class TaskControllerIntegrationTest {
     void testUpdateTask_NotFound() throws Exception {
         // Arrange
         when(taskService.updateTask(anyLong(), any(TaskUpdateDTO.class)))
-                .thenThrow(new TaskNotFoundException("Task not found"));
+                .thenThrow(new ResourceNotFoundException("Task not found"));
 
         // Act & Assert
         mockMvc.perform(patch("/api/v1/tasks/999")
@@ -215,7 +218,7 @@ class TaskControllerIntegrationTest {
     @WithMockUser(roles = "EMPLOYEE")
     void testDeleteTask_NotFound() throws Exception {
         // Arrange
-        doThrow(new TaskNotFoundException("Task not found"))
+        doThrow(new ResourceNotFoundException("Task not found"))
                 .when(taskService).deleteTask(999L);
 
         // Act & Assert

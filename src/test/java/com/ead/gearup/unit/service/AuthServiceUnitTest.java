@@ -35,6 +35,7 @@ import com.ead.gearup.exception.InvalidRefreshTokenException;
 import com.ead.gearup.exception.ResendEmailCooldownException;
 import com.ead.gearup.model.User;
 import com.ead.gearup.model.UserPrinciple;
+import com.ead.gearup.repository.CustomerRepository;
 import com.ead.gearup.repository.UserRepository;
 import com.ead.gearup.service.AuthService;
 import com.ead.gearup.service.EmailVerificationService;
@@ -51,6 +52,9 @@ class AuthServiceUnitTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private CustomerRepository customerRepository;
 
     @Mock
     private AuthenticationManager authManager;
@@ -82,6 +86,7 @@ class AuthServiceUnitTest {
 
         when(encoder.encode(anyString())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(customerRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         UserResponseDTO response = authService.createUser(dto);
 
@@ -217,11 +222,15 @@ class AuthServiceUnitTest {
     void testGetRefreshAccessTokenSuccess() {
         String refreshToken = "refreshToken";
         UserDetails userDetails = mock(UserDetails.class);
+        User testUser = new User();
+        testUser.setUserId(1L);
+        testUser.setEmail("test@example.com");
 
         when(jwtService.extractUsername(refreshToken)).thenReturn("test@example.com");
         when(customUserDetailsService.loadUserByUsername("test@example.com")).thenReturn(userDetails);
         when(jwtService.validateRefreshToken(refreshToken, userDetails)).thenReturn(true);
-        when(jwtService.generateAccessToken(userDetails)).thenReturn("newAccessToken");
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(jwtService.generateAccessToken(eq(userDetails), anyMap())).thenReturn("newAccessToken");
 
         LoginResponseDTO response = authService.getRefreshAccessToken(refreshToken);
 

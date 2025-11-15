@@ -185,6 +185,19 @@ class SearchGraphQLControllerTest {
 mvn test
 ```
 
+**Current Test Status (as of November 15, 2025):**
+- ✅ **Unit Tests**: 173/173 passing (100%)
+- ⚠️ **Integration Tests**: 127/142 passing (89.4%)
+- ✅ **Total**: 300/315 passing (95.2%)
+
+**Known Integration Test Issues (15 failures):**
+- AppointmentController: 2 JSON path issues
+- CustomerController: 3 HTTP status mismatches
+- NotificationController: 2 HTTP status improvements (404 instead of 500)
+- ProjectController: 3 HTTP status mismatches
+- TaskController: 3 HTTP status mismatches (404 vs 500)
+- VehicleController: 2 HTTP status/permission issues
+
 ### Run Specific Test Class
 
 ```powershell

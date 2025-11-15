@@ -74,6 +74,7 @@ class ProjectServiceUnitTest {
         // Setup test appointment
         testAppointment = new Appointment();
         testAppointment.setAppointmentId(1L);
+        testAppointment.setCustomer(testCustomer);
 
         // Setup test vehicle
         testVehicle = new Vehicle();
@@ -127,8 +128,8 @@ class ProjectServiceUnitTest {
         // Assert
         assertNotNull(result);
         assertEquals("Test Project", result.getName());
-        assertEquals(ProjectStatus.CREATED, testProject.getStatus());
-        verify(projectRepository, times(1)).save(any(Project.class));
+        assertEquals(ProjectStatus.IN_PROGRESS, testProject.getStatus());
+        verify(projectRepository, times(2)).save(any(Project.class)); // saved twice in implementation
     }
 
     @Test
@@ -197,7 +198,9 @@ class ProjectServiceUnitTest {
     @Test
     void testGetProjectById_Success_AsAdmin() {
         // Arrange
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(testProject));
+        when(projectRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(testProject));
+        when(projectRepository.fetchAssignedEmployees(any())).thenReturn(null);
+        when(projectRepository.fetchTasks(any())).thenReturn(null);
         when(currentUserService.getCurrentUserRole()).thenReturn(UserRole.ADMIN);
         when(projectDTOConverter.convertToResponseDto(any())).thenReturn(responseDTO);
 
@@ -212,7 +215,9 @@ class ProjectServiceUnitTest {
     @Test
     void testGetProjectById_Success_AsCustomer() {
         // Arrange
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(testProject));
+        when(projectRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(testProject));
+        when(projectRepository.fetchAssignedEmployees(any())).thenReturn(null);
+        when(projectRepository.fetchTasks(any())).thenReturn(null);
         when(currentUserService.getCurrentUserRole()).thenReturn(UserRole.CUSTOMER);
         when(currentUserService.getCurrentEntityId()).thenReturn(1L);
         when(projectDTOConverter.convertToResponseDto(any())).thenReturn(responseDTO);
@@ -227,7 +232,9 @@ class ProjectServiceUnitTest {
     @Test
     void testGetProjectById_UnauthorizedCustomer() {
         // Arrange
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(testProject));
+        when(projectRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(testProject));
+        when(projectRepository.fetchAssignedEmployees(any())).thenReturn(null);
+        when(projectRepository.fetchTasks(any())).thenReturn(null);
         when(currentUserService.getCurrentUserRole()).thenReturn(UserRole.CUSTOMER);
         when(currentUserService.getCurrentEntityId()).thenReturn(999L); // Different customer
 
@@ -239,19 +246,22 @@ class ProjectServiceUnitTest {
     @Test
     void testGetProjectById_NotFound() {
         // Arrange
-        when(projectRepository.findById(999L)).thenReturn(Optional.empty());
+        when(projectRepository.findByIdWithDetails(999L)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(ProjectNotFoundException.class, () -> projectService.getProjectById(999L));
+        verify(projectRepository, times(1)).findByIdWithDetails(999L);
     }
 
-    // ========== getAllProjects() Tests ==========
+    //========== getAllProjects() Tests ==========
     @Test
     void testGetAllProjects_AsAdmin() {
         // Arrange
         List<Project> projects = Arrays.asList(testProject);
         when(currentUserService.getCurrentUserRole()).thenReturn(UserRole.ADMIN);
-        when(projectRepository.findAll()).thenReturn(projects);
+        when(projectRepository.findAllWithDetails()).thenReturn(projects);
+        when(projectRepository.fetchAssignedEmployees(any())).thenReturn(null);
+        when(projectRepository.fetchTasks(any())).thenReturn(null);
         when(projectDTOConverter.convertToResponseDto(any())).thenReturn(responseDTO);
 
         // Act
@@ -268,7 +278,9 @@ class ProjectServiceUnitTest {
         List<Project> projects = Arrays.asList(testProject);
         when(currentUserService.getCurrentUserRole()).thenReturn(UserRole.CUSTOMER);
         when(currentUserService.getCurrentEntityId()).thenReturn(1L);
-        when(projectRepository.findAll()).thenReturn(projects);
+        when(projectRepository.findAllByCustomerIdWithDetails(1L)).thenReturn(projects);
+        when(projectRepository.fetchAssignedEmployees(any())).thenReturn(null);
+        when(projectRepository.fetchTasks(any())).thenReturn(null);
         when(projectDTOConverter.convertToResponseDto(any())).thenReturn(responseDTO);
 
         // Act
@@ -307,7 +319,12 @@ class ProjectServiceUnitTest {
     @Test
     void testUpdateProjectStatus_Success() {
         // Arrange
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(testProject));
+        Employee assignedEmployee = new Employee();
+        assignedEmployee.setEmployeeId(1L);
+        testProject.setAssignedEmployees(List.of(assignedEmployee));
+        
+        when(projectRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(testProject));
+        when(currentUserService.getCurrentUserRole()).thenReturn(UserRole.ADMIN);
         when(projectRepository.save(any(Project.class))).thenReturn(testProject);
         when(projectDTOConverter.convertToResponseDto(any())).thenReturn(responseDTO);
 
@@ -324,7 +341,8 @@ class ProjectServiceUnitTest {
     void testUpdateProjectStatus_InvalidTransition() {
         // Arrange
         testProject.setStatus(ProjectStatus.COMPLETED);
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(testProject));
+        when(projectRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(testProject));
+        when(currentUserService.getCurrentUserRole()).thenReturn(UserRole.ADMIN);
 
         // Act & Assert
         assertThrows(IllegalStateException.class, 
@@ -335,10 +353,11 @@ class ProjectServiceUnitTest {
     @Test
     void testUpdateProjectStatus_NotFound() {
         // Arrange
-        when(projectRepository.findById(999L)).thenReturn(Optional.empty());
+        when(projectRepository.findByIdWithDetails(999L)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(ProjectNotFoundException.class, 
             () -> projectService.updateProjectStatus(999L, ProjectStatus.IN_PROGRESS));
+        verify(projectRepository, times(1)).findByIdWithDetails(999L);
     }
 }

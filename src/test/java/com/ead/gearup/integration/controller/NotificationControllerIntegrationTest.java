@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.ead.gearup.dto.notification.CreateNotificationDTO;
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 // Integration tests for NotificationController
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @SuppressWarnings("removal")
 class NotificationControllerIntegrationTest {
 
@@ -255,10 +257,10 @@ class NotificationControllerIntegrationTest {
         doThrow(new ResourceNotFoundException("Notification not found"))
                 .when(notificationService).markAsRead(999L, "1");
 
-        // Act & Assert - Note: App returns 500 for ResourceNotFoundException (not 404)
+        // Act & Assert - Expecting 404 for ResourceNotFoundException
         mockMvc.perform(patch("/api/v1/notifications/999/read")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError()); // HTTP 500 (actual behavior)
+                .andExpect(status().isNotFound()); // HTTP 404 (correct behavior)
 
         verify(notificationService, times(1)).markAsRead(999L, "1");
     }
@@ -317,10 +319,10 @@ class NotificationControllerIntegrationTest {
         doThrow(new ResourceNotFoundException("Notification not found"))
                 .when(notificationService).deleteNotification(999L, "1");
 
-        // Act & Assert - Note: App returns 500 for ResourceNotFoundException (not 404)
+        // Act & Assert - Expecting 404 for ResourceNotFoundException
         mockMvc.perform(delete("/api/v1/notifications/999")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError()); // HTTP 500 (actual behavior)
+                .andExpect(status().isNotFound()); // HTTP 404 (correct behavior)
 
         verify(notificationService, times(1)).deleteNotification(999L, "1");
     }

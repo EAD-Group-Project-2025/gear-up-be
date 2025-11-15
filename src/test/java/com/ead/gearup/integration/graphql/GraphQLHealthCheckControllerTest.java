@@ -3,10 +3,13 @@ package com.ead.gearup.integration.graphql;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
+import com.ead.gearup.GearupApplication;
 import com.ead.gearup.controller.GraphQLHealthCheckController;
 
-@SpringBootTest
+@SpringBootTest(classes = GearupApplication.class)
+@ActiveProfiles("test")
 class GraphQLHealthCheckControllerTest {
 
     @Autowired

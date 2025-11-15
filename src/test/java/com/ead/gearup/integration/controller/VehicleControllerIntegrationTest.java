@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.ead.gearup.dto.vehicle.VehicleCreateDTO;
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @SuppressWarnings("removal")
 class VehicleControllerIntegrationTest {
 
@@ -144,7 +146,7 @@ class VehicleControllerIntegrationTest {
 
     // ========== GET /api/v1/vehicles ==========
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "CUSTOMER")
     void testGetAllVehicles_Success() throws Exception {
         // Arrange
         List<VehicleResponseDTO> vehicles = Arrays.asList(testVehicleResponse);
@@ -173,7 +175,7 @@ class VehicleControllerIntegrationTest {
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 
-    // ========== GET /api/v1/vehicles/customer/me ==========
+    // ========== GET /api/v1/vehicles/my-vehicles ==========
     @Test
     @WithMockUser(roles = "CUSTOMER")
     void testGetVehiclesForCurrentCustomer_Success() throws Exception {
@@ -182,7 +184,7 @@ class VehicleControllerIntegrationTest {
         when(vehicleService.getVehiclesForCurrentCustomer()).thenReturn(vehicles);
 
         // Act & Assert
-        mockMvc.perform(get("/api/v1/vehicles/customer/me"))
+        mockMvc.perform(get("/api/v1/vehicles/my-vehicles"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.data").isArray())

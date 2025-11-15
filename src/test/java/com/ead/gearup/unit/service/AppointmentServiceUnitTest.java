@@ -33,6 +33,7 @@ import com.ead.gearup.repository.AppointmentRepository;
 import com.ead.gearup.repository.CustomerRepository;
 import com.ead.gearup.repository.VehicleRepository;
 import com.ead.gearup.service.AppointmentService;
+import com.ead.gearup.service.ShopSettingsService;
 import com.ead.gearup.service.auth.CurrentUserService;
 import com.ead.gearup.util.AppointmentDTOConverter;
 
@@ -53,6 +54,9 @@ class AppointmentServiceUnitTest {
 
     @Mock
     private AppointmentRepository appointmentRepository;
+
+    @Mock
+    private ShopSettingsService shopSettingsService;
 
     @InjectMocks
     private AppointmentService appointmentService;
@@ -109,6 +113,8 @@ class AppointmentServiceUnitTest {
         when(currentUserService.getCurrentEntityId()).thenReturn(1L);
         when(customerRepository.findById(1L)).thenReturn(Optional.of(testCustomer));
         when(vehicleRepository.findById(1L)).thenReturn(Optional.of(testVehicle));
+        when(shopSettingsService.isShopOpenOnDate(any(LocalDate.class))).thenReturn(true);
+        when(shopSettingsService.isWithinOperatingHours(any(LocalTime.class))).thenReturn(true);
         when(converter.convertToEntity(any(), any(), any())).thenReturn(testAppointment);
         when(appointmentRepository.save(any(Appointment.class))).thenReturn(testAppointment);
         when(converter.convertToResponseDto(any(Appointment.class))).thenReturn(responseDTO);
@@ -125,6 +131,8 @@ class AppointmentServiceUnitTest {
     @Test
     void testCreateAppointment_CustomerNotFound() {
         // Arrange
+        when(shopSettingsService.isShopOpenOnDate(any(LocalDate.class))).thenReturn(true);
+        when(shopSettingsService.isWithinOperatingHours(any(LocalTime.class))).thenReturn(true);
         when(currentUserService.getCurrentEntityId()).thenReturn(999L);
         when(customerRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -136,6 +144,8 @@ class AppointmentServiceUnitTest {
     @Test
     void testCreateAppointment_VehicleNotFound() {
         // Arrange
+        when(shopSettingsService.isShopOpenOnDate(any(LocalDate.class))).thenReturn(true);
+        when(shopSettingsService.isWithinOperatingHours(any(LocalTime.class))).thenReturn(true);
         when(currentUserService.getCurrentEntityId()).thenReturn(1L);
         when(customerRepository.findById(1L)).thenReturn(Optional.of(testCustomer));
         when(vehicleRepository.findById(1L)).thenReturn(Optional.empty());

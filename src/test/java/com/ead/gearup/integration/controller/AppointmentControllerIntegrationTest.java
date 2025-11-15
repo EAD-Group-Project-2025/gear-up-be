@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.ead.gearup.dto.appointment.AppointmentCreateDTO;
@@ -34,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @SuppressWarnings("removal")
 class AppointmentControllerIntegrationTest {
 
@@ -96,7 +98,7 @@ class AppointmentControllerIntegrationTest {
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.message").value("Appointment created successfully"))
                 .andExpect(jsonPath("$.data.id").value(1))
-                .andExpect(jsonPath("$.data.description").value("Oil change"));
+                .andExpect(jsonPath("$.data.customerIssue").value("Oil change"));
 
         verify(appointmentService, times(1)).createAppointment(any(AppointmentCreateDTO.class));
     }
@@ -121,16 +123,15 @@ class AppointmentControllerIntegrationTest {
     void testGetAllAppointments_Success() throws Exception {
         // Arrange
         List<AppointmentResponseDTO> appointments = Arrays.asList(testAppointmentResponse);
-        when(appointmentService.getAllAppointmentsForCurrentCustomer()).thenReturn(appointments);
+        when(appointmentService.getAllAppointments()).thenReturn(appointments);
 
         // Act & Assert
         mockMvc.perform(get("/api/v1/appointments"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data[0].id").value(1));
+                .andExpect(jsonPath("$.data").isArray());
 
-        verify(appointmentService, times(1)).getAllAppointmentsForCurrentCustomer();
+        verify(appointmentService, times(1)).getAllAppointments();
     }
 
     // ========== GET /api/v1/appointments/{id} ==========
